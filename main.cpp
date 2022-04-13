@@ -226,6 +226,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
+		//4.描画コマンド
+
+		//4.ここまで、描画コマンド
 
 		//メッセージはあるか？
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
