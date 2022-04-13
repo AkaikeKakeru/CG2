@@ -205,6 +205,18 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 
 	//ゲームループ
 	while (true) {
+
+		//バックバッファの番号を取得(0番か1番)
+		UINT bbIndex = swapChain->GetCurrentBackBufferIndex();
+
+		//1.リソースバリアで書き込みに変更
+		D3D12_RESOURCE_BARRIER barrierDesc{};
+		barrierDesc.Transition.pResource = backBuffers[bbIndex];
+		barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		commandList->ResourceBarrier(1, &barrierDesc);
+
+
 		//メッセージはあるか？
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
