@@ -222,6 +222,10 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		rtvHandle.ptr += bbIndex * device->GetDescriptorHandleIncrementSize(rtvHeapDesc.Type);
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
+		//3.画面クリア          R      G      B     A
+		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
+		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
 
 		//メッセージはあるか？
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
