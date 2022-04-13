@@ -160,6 +160,12 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		(IDXGISwapChain1**)&swapChain);
 	assert(SUCCEEDED(result));
 	
+	//デスクリプタヒープの設定
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rtvHeapDesc.NumDescriptors = swapChainDesc.BufferCount;
+	//デスクリプタヒープの生成
+	device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
 
 	//ゲームループ
 	while (true) {
