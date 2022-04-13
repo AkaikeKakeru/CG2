@@ -189,7 +189,11 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		device->CreateRenderTargetView(backBuffers[i], &rtvDesc, rtvHandle);
 	}
 
+	//フェンスの生成
+	ID3D12Fence* fence = nullptr;
+	UINT64 fenceVal = 0;
 
+	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	//ゲームループ
 	while (true) {
 		//メッセージはあるか？
