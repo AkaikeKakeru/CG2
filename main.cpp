@@ -89,6 +89,20 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		adapters.push_back(tmpAdapter);
 	}
 	
+	//妥当なアダプタを選別
+	for (size_t i = 0; i < adapters.size(); i++) {
+		DXGI_ADAPTER_DESC3 adapterDesc;
+		//アダプターの情報を取得
+		adapters[i]->GetDesc3(&adapterDesc);
+
+		//ソフトウェアデバイスを回避
+		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
+			//デバイスを採用してループを抜ける
+			tmpAdapter = adapters[i];
+			break;
+		}
+	}
+
 	//ゲームループ
 	while (true) {
 		//メッセージはあるか？
