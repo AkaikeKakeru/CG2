@@ -1,5 +1,8 @@
 #include <Windows.h>
 
+#include <vector>
+#include <string>
+
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cassert>
@@ -68,6 +71,24 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	ID3D12CommandQueue* commandQueue = nullptr;
 	ID3D12DescriptorHeap* rtvHeap = nullptr;
 
+	//DXGIファクトリー生成
+	result = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactry));
+	assert(SUCCEEDED(result));
+
+	//アダプターの列挙用
+	std::vector<IDXGIAdapter4*>adapters;
+	//ここに特定の名前を持つアダプターオブジェクトが入る
+	IDXGIAdapter4* tmpAdapter = nullptr;
+
+	//パフォーマンスが高いものから順に、すべてのアダプターを列挙
+	for (UINT i = 0; 
+		dxgiFactry->EnumAdapterByGpuPreference(i,DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,IID_PPV_ARGS(&tmpAdapter)) != DXGI_ERROR_NOT_FOUND
+	; i++)
+	{
+		//動的配列に追加
+		adapters.push_back(tmpAdapter);
+	}
+	
 	//ゲームループ
 	while (true) {
 		//メッセージはあるか？
