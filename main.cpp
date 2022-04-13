@@ -16,5 +16,24 @@ LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
 
 int WINAPI winMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	
+	//サイズ
+	const int window_width = 1280;
+	const int window_height = 720;
+
+	//クラス設定
+	WNDCLASSEX w{};
+	w.cbSize = sizeof(WNDCLASSEX);
+	w.lpfnWndProc = (WNDPROC)WindowProc;
+	w.lpszClassName = L"DirectXGame";
+	w.hInstance = GetModuleHandle(nullptr);
+	w.hCursor = LoadCursor(NULL, IDC_ARROW);
+
+	//OSに登録
+	RegisterClassEx(&w);
+	//サイズ
+	RECT wrc = { 0,0,window_width,window_height };
+	//自動でサイズ修正
+	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
+
 	return 0;
 }
