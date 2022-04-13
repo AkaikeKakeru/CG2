@@ -61,6 +61,13 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG msg{};//メッセージ
+	
+#ifdef _DEBUG
+			  //デバッグプレイヤーをオンに
+	ID3D12Debug* debugController;
+	if(SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))){
+	}
+#endif
 
 	HRESULT result;
 	ID3D12Device* device = nullptr;
@@ -125,9 +132,8 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	}
 
 	//コマンドアロケータを生成
-	result = device->CreateCommandList(0,
+	result = device->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		commandAllocator, nullptr,
 		IID_PPV_ARGS(&commandAllocator));
 	assert(SUCCEEDED(result));
 
@@ -194,6 +200,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	UINT64 fenceVal = 0;
 
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	
+
+
 	//ゲームループ
 	while (true) {
 		//メッセージはあるか？
