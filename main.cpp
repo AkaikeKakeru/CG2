@@ -230,6 +230,11 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 
 		//4.ここまで、描画コマンド
 
+		//5.リソースバリアを戻す
+		barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		commandList->ResourceBarrier(1, &barrierDesc);
+
 		//メッセージはあるか？
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
