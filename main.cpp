@@ -11,21 +11,21 @@
 #pragma comment(lib,"dxgi.lib")
 
 //ウィンドウプロシージャ
-LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
-	switch (msg){
-	//ウィンドウ破棄されたなら
+LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+	switch (msg) {
+		//ウィンドウ破棄されたなら
 	case WM_DESTROY:
 		//OSに対してアプリ終了を通知
 		PostQuitMessage(0);
 		return 0;
 	}
-	
+
 	//メッセージ処理
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
-	
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+
 	//サイズ
 	const int window_width = 1280;
 	const int window_height = 720;
@@ -61,11 +61,11 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG msg{};//メッセージ
-	
+
 #ifdef _DEBUG
 			  //デバッグプレイヤーをオンに
 	ID3D12Debug* debugController;
-	if(SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))){
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 	}
 #endif
 
@@ -88,14 +88,14 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	IDXGIAdapter4* tmpAdapter = nullptr;
 
 	//パフォーマンスが高いものから順に、すべてのアダプターを列挙
-	for (UINT i = 0; 
-		dxgiFactry->EnumAdapterByGpuPreference(i,DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,IID_PPV_ARGS(&tmpAdapter)) != DXGI_ERROR_NOT_FOUND
-	; i++)
+	for (UINT i = 0;
+		dxgiFactry->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&tmpAdapter)) != DXGI_ERROR_NOT_FOUND
+		; i++)
 	{
 		//動的配列に追加
 		adapters.push_back(tmpAdapter);
 	}
-	
+
 	//妥当なアダプタを選別
 	for (size_t i = 0; i < adapters.size(); i++) {
 		DXGI_ADAPTER_DESC3 adapterDesc;
@@ -120,9 +120,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 
 	D3D_FEATURE_LEVEL featureLevel;
 
-	for (size_t i = 0; i < _countof(levels); i++){
+	for (size_t i = 0; i < _countof(levels); i++) {
 		//採用したアダプターでデバイスを生成
-		result = D3D12CreateDevice(tmpAdapter,levels[i],
+		result = D3D12CreateDevice(tmpAdapter, levels[i],
 			IID_PPV_ARGS(&device));
 		if (result == S_OK) {
 			//デバイスを生成できた時点でループを抜ける
@@ -165,7 +165,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		commandQueue, hwnd, &swapChainDesc, nullptr, nullptr,
 		(IDXGISwapChain1**)&swapChain);
 	assert(SUCCEEDED(result));
-	
+
 	//デスクリプタヒープの設定
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -200,7 +200,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	UINT64 fenceVal = 0;
 
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	
+
 
 
 	//ゲームループ
@@ -274,7 +274,6 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		if (msg.message == WM_QUIT) {
 			break;
 		}
-
 	}
 
 	//クラス登録を解除
