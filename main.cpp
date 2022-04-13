@@ -66,7 +66,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	ID3D12Device* device = nullptr;
 	IDXGIFactory7* dxgiFactry = nullptr;
 	IDXGISwapChain4* swapChain = nullptr;
-	ID3D12CommandAllocator* cmdAllocator = nullptr;
+	ID3D12CommandAllocator* commandAllocator = nullptr;
 	ID3D12GraphicsCommandList* commandList = nullptr;
 	ID3D12CommandQueue* commandQueue = nullptr;
 	ID3D12DescriptorHeap* rtvHeap = nullptr;
@@ -123,6 +123,13 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 			break;
 		}
 	}
+
+	//コマンドアロケータを生成
+	result = device->CreateCommandList(0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		commandAllocator, nullptr,
+		IID_PPV_ARGS(&commandList));
+	assert(SUCCEEDED(result));
 
 	//ゲームループ
 	while (true) {
