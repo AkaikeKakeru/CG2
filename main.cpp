@@ -35,5 +35,20 @@ int WINAPI winMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	//自動でサイズ修正
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
+	HWND hwnd = CreateWindow(w.lpszClassName,
+		L"DirectXGame",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		wrc.right - wrc.left,
+		wrc.bottom - wrc.top,
+		nullptr,
+		nullptr,
+		w.hInstance,
+		nullptr);
+
+	//表示状態にする
+	ShowWindow(hwnd, SW_SHOW);
+
 	return 0;
 }
