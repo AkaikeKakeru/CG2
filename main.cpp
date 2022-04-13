@@ -14,7 +14,7 @@ LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-int WINAPI winMain(HINSTANCE,HINSTANCE,LPSTR,int){
+int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	
 	//サイズ
 	const int window_width = 1280;
@@ -49,6 +49,27 @@ int WINAPI winMain(HINSTANCE,HINSTANCE,LPSTR,int){
 
 	//表示状態にする
 	ShowWindow(hwnd, SW_SHOW);
+
+	MSG msg{};//メッセージ
+
+
+
+	//ゲームループ
+	while (true) {
+		//メッセージはあるか？
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		//×で終了メッセージが来たらループを抜ける
+		if (msg.message == WM_QUIT) {
+			break;
+		}
+
+	}
+
+	//クラス登録を解除
+	UnregisterClass(w.lpszClassName, w.hInstance);
 
 	return 0;
 }
