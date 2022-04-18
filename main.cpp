@@ -8,8 +8,12 @@
 #include <dxgi1_6.h>
 #include <cassert>
 
+#include <d3dcompiler.h>
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
+
+#pragma comment(lib, "d3dcompiler.lib")
 
 using namespace DirectX;
 
@@ -28,7 +32,7 @@ LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
 }
 
 int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
-	//WindowsAPI初期化処理　ここから
+	//------WindowsAPI初期化処理 ここから------
 	//サイズ
 	const int window_width = 1280;
 	const int window_height = 720;
@@ -64,9 +68,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG msg{};//メッセージ
-	//WindowsAPI初期化処理　ここまで
+	//------WindowsAPI初期化処理 ここまで------
 	
-	//DirectX初期化処理　ここから
+	//------DirectX初期化処理 ここから------
 #ifdef _DEBUG
 			  //デバッグプレイヤーをオンに
 	ID3D12Debug* debugController;
@@ -205,9 +209,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	UINT64 fenceVal = 0;
 
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	//DirectX初期化処理　ここまで
+	//------DirectX初期化処理 ここまで------
 	
-	//描画初期化処理ここから
+	//------描画初期化処理 ここから------
 	//頂点データ
 	XMFLOAT3 vertices[] = {
 		{-0.5f,-0.5f,0.0f},//左下
@@ -263,8 +267,21 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	//頂点１つ分のデータサイズ
 	vbView.StrideInBytes = sizeof(XMFLOAT3);
 
+	ID3DBlob* vsBlob = nullptr;//頂点シェーダオブジェクト
+	ID3DBlob* psBlob = nullptr;//ピクセルシェーダオブジェクト
+	ID3DBlob* errorBlob = nullptr;//エラーオブジェクト
 
-	//描画初期化処理ここまで
+	//頂点シェーダの読み込みとコンパイル
+	result = D3DCompileFromFile(
+		L"BasicVS.html",//シェーダファイル名
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,//インクルード可能にする
+		"main", "vs_5_0",//エントリーポイント名、シェーダ―モデル指定
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,//デバッグ用設定
+		0,
+		&vsBlob, &errorBlob);
+	
+	//------描画初期化処理 ここまで------
 	
 	//ゲームループ
 	while (true) {
