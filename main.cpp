@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <DirectXMath.h>
 
 #include <vector>
 #include <string>
@@ -9,6 +10,8 @@
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
+
+using namespace DirectX;
 
 //ウィンドウプロシージャ
 LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
@@ -25,7 +28,7 @@ LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
 }
 
 int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
-	
+	//WindowsAPI初期化処理　ここから
 	//サイズ
 	const int window_width = 1280;
 	const int window_height = 720;
@@ -61,7 +64,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG msg{};//メッセージ
+	//WindowsAPI初期化処理　ここまで
 	
+	//DirectX初期化処理　ここから
 #ifdef _DEBUG
 			  //デバッグプレイヤーをオンに
 	ID3D12Debug* debugController;
@@ -200,9 +205,12 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	UINT64 fenceVal = 0;
 
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	//DirectX初期化処理　ここまで
 	
-
-
+	//描画初期化処理ここから
+	
+	//描画初期化処理ここまで
+	
 	//ゲームループ
 	while (true) {
 
