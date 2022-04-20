@@ -361,6 +361,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//0～255指定のRGBA
 	pipelineDesc.SampleDesc.Count = 1;//1ピクセルにつき1回サンプリング
 
+	//ルートシグネチャ
+	ID3D12RootSignature* rootSignature;
+	//ルートシグネチャの設定
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+	//ルートシグネチャのシリアライズ
+	ID3DBlob* rootSigBlob = nullptr;
+	result = D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1_0,
+		&rootSigBlob, &errorBlob);
+	assert(SUCCEEDED(result));
+	result = device->CreateRootSignature(0,rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(),
+		IID_PPV_ARGS(&rootSignature));
+	assert(SUCCEEDED(result));
+	rootSigBlob->Release();
+	//パイプラインにルートシグネイチャをセット
+	pipelineDesc.pRootSignature = rootSignature;
 
 	//------描画初期化処理 ここまで------
 	
