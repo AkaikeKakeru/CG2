@@ -439,6 +439,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//プリミティブ形状の設定コマンド
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);//三角形リスト
 
+		//頂点バッファビューの設定コマンド
+		commandList->IASetVertexBuffers(0, 1, &vbView);
 
 		//4.ここまで、描画コマンド
 
