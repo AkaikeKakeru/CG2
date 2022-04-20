@@ -446,13 +446,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//3.画面クリア          R      G      B     A
 		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
 
 		//キーボード情報の取得開始
 		keyboard->Acquire();
 		//全キーの入力状態を取得する
 		BYTE key[256] = {};
 		keyboard->GetDeviceState(sizeof(key), key);
+
+		//スペースキー押してる？
+		if(key[DIK_SPACE])
+		{
+			clearColor[0] = 0.5f;
+			clearColor[1] = 0.1f;
+			clearColor[2] = 0.25f;
+		}
+		else
+		{
+			clearColor[0] = 0.1f;
+			clearColor[1] = 0.25f;
+			clearColor[2] = 0.5f;
+		}
+
+		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+		
 
 		//4.描画コマンドここから
 
@@ -485,6 +503,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
+
+
+	
+		
+
 
 		//描画コマンド
 		commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
