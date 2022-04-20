@@ -273,7 +273,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//頂点シェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
-		L"BasicVS.html",//シェーダファイル名
+		L"BasicVS.hlsl",//シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,//インクルード可能にする
 		"main", "vs_5_0",//エントリーポイント名、シェーダ―モデル指定
@@ -422,6 +422,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		viewport.MaxDepth = 1.0f;
 		//ビューポート設定コマンドを、コマンドリストに積む
 		commandList->RSSetViewports(1, &viewport);
+
+		//シザー矩形
+		D3D12_RECT scissorRect{};							//切り抜き座標
+		scissorRect.left = 0;								//左
+		scissorRect.right = scissorRect.left + window_width;//右
+		scissorRect.top = 0;								//上
+		scissorRect.bottom = scissorRect.top + window_height;//下
+		//シザー矩形設定コマンドを、コマンドリストに積む
+		commandList->RSSetScissorRects(1, &scissorRect);
+
+		
+
 
 		//4.ここまで、描画コマンド
 
