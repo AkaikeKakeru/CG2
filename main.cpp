@@ -8,12 +8,12 @@
 #include <dxgi1_6.h>
 #include <cassert>
 
-#include <d3dcompiler.h>
+#include <d3dcompiler.h>//シェーダ用コンパイラ
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
-#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "d3dcompiler.lib")//シェーダ用コンパイラ
 
 using namespace DirectX;
 
@@ -281,6 +281,8 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		0,
 		&vsBlob, &errorBlob);
 	
+
+
 	//------描画初期化処理 ここまで------
 	
 	//ゲームループ
