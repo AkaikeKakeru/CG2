@@ -281,7 +281,20 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		0,
 		&vsBlob, &errorBlob);
 	
+	//エラーなら
+	if (FAILED(result)) {
+		//errorBlobからエラー内容をstring型にコピー
+		std::string error;
+		error.resize(errorBlob->GetBufferSize());
 
+		std::copy_n((char*)errorBlob->GetBufferPointer(),
+			errorBlob->GetBufferSize(),
+			error.begin());
+		error += "\n";
+		//エラー内容を出力ウィンドウに表示
+		OutputDebugStringA(error.c_str());
+		assert(0);
+	}
 
 	//------描画初期化処理 ここまで------
 	
