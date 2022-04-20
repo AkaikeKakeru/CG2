@@ -295,6 +295,17 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		OutputDebugStringA(error.c_str());
 		assert(0);
 	}
+	
+	//ピクセルシェーダの読み込みとコンパイル
+	result = D3DCompileFromFile(
+		L"BasicPS.hlsl",//シェーダファイル名
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,//インクルード可能にする
+		"main", "ps_5_0",//エントリーポイント名、シェーダーモデル指定
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,//デバッグ用設定
+		0,
+		&psBlob, &errorBlob);
+	
 
 	//------描画初期化処理 ここまで------
 	
