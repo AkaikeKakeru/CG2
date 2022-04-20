@@ -1,3 +1,5 @@
+#define DIRECTINPUT_VERSION		0x0000 //DirectInputのバージョン指定
+
 #include <Windows.h>
 #include <DirectXMath.h>
 
@@ -10,10 +12,15 @@
 
 #include <d3dcompiler.h>//シェーダ用コンパイラ
 
+#include <dinput.h>
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
 #pragma comment(lib, "d3dcompiler.lib")//シェーダ用コンパイラ
+
+#pragma comment(lib,"dinput8.lib")
+#pragma comment(lib,"dxguid.lib")
 
 using namespace DirectX;
 
