@@ -329,6 +329,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		},//(1行で書いた方が見やすいかも)
 	};
 
+	//グラフィックスパイプライン設定
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc{};
+
+
+
 	//------描画初期化処理 ここまで------
 	
 	//ゲームループ
