@@ -378,6 +378,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//パイプラインにルートシグネイチャをセット
 	pipelineDesc.pRootSignature = rootSignature;
 
+	//パイプラインステートの生成
+	ID3D12PipelineState*  pipelineState = nullptr;
+	result = device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
+	assert(SUCCEEDED(result));
+
 	//------描画初期化処理 ここまで------
 	
 	//ゲームループ
