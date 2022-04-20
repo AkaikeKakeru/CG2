@@ -31,7 +31,7 @@ LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//------WindowsAPI初期化処理 ここから------
 	//サイズ
 	const int window_width = 1280;
@@ -69,12 +69,12 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 
 	MSG msg{};//メッセージ
 	//------WindowsAPI初期化処理 ここまで------
-	
+
 	//------DirectX初期化処理 ここから------
 #ifdef _DEBUG
 			  //デバッグプレイヤーをオンに
 	ID3D12Debug* debugController;
-	if(SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))){
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
 	}
 #endif
 
@@ -97,14 +97,14 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 	IDXGIAdapter4* tmpAdapter = nullptr;
 
 	//パフォーマンスが高いものから順に、すべてのアダプターを列挙
-	for (UINT i = 0; 
-		dxgiFactry->EnumAdapterByGpuPreference(i,DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,IID_PPV_ARGS(&tmpAdapter)) != DXGI_ERROR_NOT_FOUND
-	; i++)
+	for (UINT i = 0;
+		dxgiFactry->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&tmpAdapter)) != DXGI_ERROR_NOT_FOUND
+		; i++)
 	{
 		//動的配列に追加
 		adapters.push_back(tmpAdapter);
 	}
-	
+
 	//妥当なアダプタを選別
 	for (size_t i = 0; i < adapters.size(); i++) {
 		DXGI_ADAPTER_DESC3 adapterDesc;
@@ -129,9 +129,9 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 
 	D3D_FEATURE_LEVEL featureLevel;
 
-	for (size_t i = 0; i < _countof(levels); i++){
+	for (size_t i = 0; i < _countof(levels); i++) {
 		//採用したアダプターでデバイスを生成
-		result = D3D12CreateDevice(tmpAdapter,levels[i],
+		result = D3D12CreateDevice(tmpAdapter, levels[i],
 			IID_PPV_ARGS(&device));
 		if (result == S_OK) {
 			//デバイスを生成できた時点でループを抜ける
@@ -174,7 +174,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		commandQueue, hwnd, &swapChainDesc, nullptr, nullptr,
 		(IDXGISwapChain1**)&swapChain);
 	assert(SUCCEEDED(result));
-	
+
 	//デスクリプタヒープの設定
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -210,7 +210,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	//------DirectX初期化処理 ここまで------
-	
+
 	//------描画初期化処理 ここから------
 	//頂点データ
 	XMFLOAT3 vertices[] = {
@@ -280,7 +280,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,//デバッグ用設定
 		0,
 		&vsBlob, &errorBlob);
-	
+
 	//エラーなら
 	if (FAILED(result)) {
 		//errorBlobからエラー内容をstring型にコピー
@@ -295,7 +295,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		OutputDebugStringA(error.c_str());
 		assert(0);
 	}
-	
+
 	//ピクセルシェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
 		L"BasicPS.hlsl",//シェーダファイル名
@@ -305,7 +305,7 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,//デバッグ用設定
 		0,
 		&psBlob, &errorBlob);
-	
+
 	//エラーなら
 	if (FAILED(result)) {
 		//errorBlobからエラー内容をstring型にコピー
@@ -320,6 +320,14 @@ int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
 		OutputDebugStringA(error.c_str());
 		assert(0);
 	}
+
+	//頂点レイアウト
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,
+		D3D12_APPEND_ALIGNED_ELEMENT,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,0
+		},//(1行で書いた方が見やすいかも)
+	};
 
 	//------描画初期化処理 ここまで------
 	
