@@ -347,14 +347,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.RasterizerState.DepthClipEnable = true;//深度クリッピングを有効に
 
 	//ブレンドステート
-	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;//RGB全てのチャネルを描画
+	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask 
+		= D3D12_COLOR_WRITE_ENABLE_ALL;//RGB全てのチャネルを描画
 
 	//頂点レイアウトの設定
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 	pipelineDesc.InputLayout.NumElements = _countof(inputLayout);
 
 	//図形の形状設定
-	pipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	pipelineDesc.PrimitiveTopologyType 
+		= D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	//その他の設定
 	pipelineDesc.NumRenderTargets = 1;//描画対象は1つ
@@ -408,7 +410,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-		//4.描画コマンド
+		//4.描画コマンドここから
+
+		//ビューポート設定コマンド
+		D3D12_VIEWPORT viewport{};
+		viewport.Width = window_width;
+		viewport.Height = window_height;
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+		//ビューポート設定コマンドを、コマンドリストに積む
+		commandList->RSSetViewports(1, &viewport);
 
 		//4.ここまで、描画コマンド
 
