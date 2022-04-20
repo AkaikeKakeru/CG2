@@ -1,4 +1,4 @@
-#define DIRECTINPUT_VERSION		0x0000 //DirectInputのバージョン指定
+#define DIRECTINPUT_VERSION		0x0800 //DirectInputのバージョン指定
 
 #include <Windows.h>
 #include <DirectXMath.h>
@@ -216,6 +216,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	UINT64 fenceVal = 0;
 
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+
+	//DirectInputの初期化
+	IDirectInput8* directInput = nullptr;
+	result = DirectInput8Create(
+		w.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
+		(void**)&directInput, nullptr);
+	assert(SUCCEEDED(result));
+
 	//------DirectX初期化処理 ここまで------
 
 	//------描画初期化処理 ここから------
