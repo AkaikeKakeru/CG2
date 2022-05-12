@@ -384,9 +384,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;//ポリゴン内塗りつぶし
 	pipelineDesc.RasterizerState.DepthClipEnable = true;//深度クリッピングを有効に
 
-	//ブレンドステート
-	pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask 
-		= D3D12_COLOR_WRITE_ENABLE_ALL;//RGB全てのチャネルを描画
+	////ブレンドステート
+	//pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask 
+	//	= D3D12_COLOR_WRITE_ENABLE_ALL;//RGB全てのチャネルを描画
+
+	//レンダ―ターゲットのブレンド設定
+	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc = pipelineDesc.BlendState.RenderTarget[0];
+	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	//頂点レイアウトの設定
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
@@ -476,18 +480,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//ビューポート設定コマンド
 		D3D12_VIEWPORT viewport{};
-		viewport.Width = window_width;
-		viewport.Height = window_height;
-		viewport.TopLeftX = 0;
-		viewport.TopLeftY = 0;
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
+		viewport.Width = window_width/2;				//横幅
+		viewport.Height = window_height;			//縦幅
+		viewport.TopLeftX = 0;		//左上x
+		viewport.TopLeftY = 0;						//左上y
+		viewport.MinDepth = 0.0f;					//最小深度(0でよい)
+		viewport.MaxDepth = 1.0f;					//最大深度(1でよい)
 		//ビューポート設定コマンドを、コマンドリストに積む
 		commandList->RSSetViewports(1, &viewport);
 
 		//シザー矩形
 		D3D12_RECT scissorRect{};							//切り抜き座標
-		scissorRect.left = 0;								//左
+		scissorRect.left = -1000;								//左
 		scissorRect.right = scissorRect.left + window_width;//右
 		scissorRect.top = 0;								//上
 		scissorRect.bottom = scissorRect.top + window_height;//下
@@ -504,9 +508,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
 
-
-	
-		
 
 
 		//描画コマンド
