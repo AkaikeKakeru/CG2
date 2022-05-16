@@ -540,7 +540,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{
 			transform_.Trans_.y += 0.05f;
 		}
-		if(key[DIK_X])
+		if(key[DIK_S])
 		{
 			transform_.Trans_.y -= 0.05f;
 		}
