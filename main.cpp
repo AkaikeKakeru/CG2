@@ -24,16 +24,29 @@
 
 using namespace DirectX;
 
+struct Direction_
+{
+	float x;
+	float y;
+};
+
+struct Transform_
+{
+	Direction_ Trans_;
+	float Rota;
+	float Scale;
+};
+
 //ウィンドウプロシージャ
-LRESULT WindowProc(HWND hwnd,UINT msg, WPARAM wparam, LPARAM lparam){
-	switch (msg){
-	//ウィンドウ破棄されたなら
+LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+	switch (msg) {
+		//ウィンドウ破棄されたなら
 	case WM_DESTROY:
 		//OSに対してアプリ終了を通知
 		PostQuitMessage(0);
 		return 0;
 	}
-	
+
 	//メッセージ処理
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -43,6 +56,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//サイズ
 	const int window_width = 1280;
 	const int window_height = 720;
+
+	const float PI = 3.1415926535f;
+
+
 
 	//クラス設定
 	WNDCLASSEX w{};
@@ -248,6 +265,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
 	};
 
+	XMFLOAT3 verticesOrigin[] = {
+		{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
+		{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
+		{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
+	};
+
+
+	Transform_ transform_ =
+	{
+
+		{
+			0.0f,0.0f
+		},
+
+			{
+				0.0f,
+			},
+
+			{
+				1.0f,
+			},
+
+	};
+
+	//アフィン
+	float affine[3][3] =
+	{
+		{1.0f,0.0f,0.0f},
+		{0.0f,1.0f,0.0f},
+		{0.0f,0.0f,1.0f},
+	};
+
+
 	//頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
 	UINT sizeVB = static_cast<UINT>(sizeof(XMFLOAT3) * _countof(vertices));
 
@@ -279,11 +329,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	XMFLOAT3* vertMap = nullptr;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	assert(SUCCEEDED(result));
-	//全頂点に対して
-	for (int i = 0; i < _countof(vertices); i++)
-	{
-		vertMap[i] = vertices[i];//座標をコピー
-	}
+
+
+
+	/* verticesに記入 */
+
+
+
+
+	////全頂点に対して
+	//for (int i = 0; i < _countof(vertices); i++)
+	//{
+	//	vertMap[i] = vertices[i];//座標をコピー
+	//}
+
 	//繋がりを解除
 	vertBuff->Unmap(0, nullptr);
 
@@ -397,7 +456,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.InputLayout.NumElements = _countof(inputLayout);
 
 	//図形の形状設定
-	pipelineDesc.PrimitiveTopologyType 
+	pipelineDesc.PrimitiveTopologyType
 		= D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	//その他の設定
@@ -412,10 +471,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 	//ルートシグネチャのシリアライズ
 	ID3DBlob* rootSigBlob = nullptr;
-	result = D3D12SerializeRootSignature(&rootSignatureDesc,D3D_ROOT_SIGNATURE_VERSION_1_0,
+	result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0,
 		&rootSigBlob, &errorBlob);
 	assert(SUCCEEDED(result));
-	result = device->CreateRootSignature(0,rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(),
+	result = device->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(),
 		IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(result));
 	rootSigBlob->Release();
@@ -423,12 +482,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.pRootSignature = rootSignature;
 
 	//パイプラインステートの生成
-	ID3D12PipelineState*  pipelineState = nullptr;
+	ID3D12PipelineState* pipelineState = nullptr;
 	result = device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
 
 	//------描画初期化処理 ここまで------
-	
+
 	//ゲームループ
 	while (true) {
 
@@ -450,6 +509,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//3.画面クリア          R      G      B     A
 		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
+		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 
 		//キーボード情報の取得開始
@@ -458,29 +518,89 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		BYTE key[256] = {};
 		keyboard->GetDeviceState(sizeof(key), key);
 
-		//スペースキー押してる？
-		if(key[DIK_SPACE])
+
+		transform_.Trans_.x = 0.0f;
+		transform_.Trans_.y = 0.0f;
+
+		transform_.Rota = 0.0f;
+
+		transform_.Scale = 1.0f;
+
+
+		if(key[DIK_D])
 		{
-			clearColor[0] = 0.5f;
-			clearColor[1] = 0.1f;
-			clearColor[2] = 0.25f;
+			transform_.Trans_.x += 0.05f;
 		}
-		else
+		if(key[DIK_A])
 		{
-			clearColor[0] = 0.1f;
-			clearColor[1] = 0.25f;
-			clearColor[2] = 0.5f;
+			transform_.Trans_.x -= 0.05f;
 		}
 
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+		if(key[DIK_W])
+		{
+			transform_.Trans_.y += 0.05f;
+		}
+		if(key[DIK_X])
+		{
+			transform_.Trans_.y -= 0.05f;
+		}
 
-		
+		if(key[DIK_Q])
+		{
+			transform_.Rota -= PI / 32;
+		}
+		if(key[DIK_E])
+		{
+			transform_.Rota += PI / 32;
+		}
+
+		if(key[DIK_Z])
+		{
+			transform_.Scale -= 0.1f;
+		}
+		if(key[DIK_C])
+		{
+			transform_.Scale += 0.1f;
+		}
+
+			affine[0][0] = transform_.Scale * cos(transform_.Rota);
+			affine[0][1] = transform_.Scale * ( - sin(transform_.Rota));
+			affine[0][2] = transform_.Trans_.x;
+
+			affine[1][0] = transform_.Scale * sin(transform_.Rota);
+			affine[1][1] = transform_.Scale * cos(transform_.Rota);
+			affine[1][2] = transform_.Trans_.y;
+
+			affine[2][0] = 0.0f;
+			affine[2][1] = 0.0f;
+			affine[2][2] = 1.0f;
+
+		for (int i = 0; i < _countof(vertices); i++)
+		{
+			vertices[i].x = vertices[i].x * affine[0][0] +
+							vertices[i].y * affine[0][1] +
+									 1.0f * affine[0][2];
+
+			vertices[i].y = vertices[i].x * affine[1][0] +
+							vertices[i].y * affine[1][1] +
+									 1.0f * affine[1][2];
+
+			vertices[i].z = vertices[i].x * affine[2][0] +
+							vertices[i].y * affine[2][1] +
+									 1.0f * affine[2][2];
+		}
+
+		//全頂点に対して
+		for (int i = 0; i < _countof(vertices); i++)
+		{
+			vertMap[i] = vertices[i];//座標をコピー
+		}
 
 		//4.描画コマンドここから
 
 		//ビューポート設定コマンド
 		D3D12_VIEWPORT viewport{};
-		viewport.Width = window_width/2;				//横幅
+		viewport.Width = window_width;				//横幅
 		viewport.Height = window_height;			//縦幅
 		viewport.TopLeftX = 0;		//左上x
 		viewport.TopLeftY = 0;						//左上y
@@ -491,10 +611,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//シザー矩形
 		D3D12_RECT scissorRect{};							//切り抜き座標
-		scissorRect.left = -1000;								//左
+		scissorRect.left = 0;								//左
 		scissorRect.right = scissorRect.left + window_width;//右
 		scissorRect.top = 0;								//上
 		scissorRect.bottom = scissorRect.top + window_height;//下
+
 		//シザー矩形設定コマンドを、コマンドリストに積む
 		commandList->RSSetScissorRects(1, &scissorRect);
 
