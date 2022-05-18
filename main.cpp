@@ -629,7 +629,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	ibView.SizeInBytes = sizeIB;
 
+
+	//横方向ピクセル数
+	const size_t textureWidth = 256;
+	//縦方向ピクセル数
+	const size_t textureHeight = 256;
+	//配列の要素数
+	const size_t imageDataCount = textureWidth * textureHeight;
+	//画像のイメージデータ配列
+	XMFLOAT4* imageData = new XMFLOAT4[imageDataCount];//必ず後で開放する
 	
+	//全ピクセルの色を初期化
+	for (size_t i = 0; i < imageDataCount; i++)
+	{
+		imageData[i].x = 1.0f; //R
+		imageData[i].y = 0.0f; //G
+		imageData[i].z = 0.0f; //B
+		imageData[i].w = 1.0f; //A
+	}
 
 	//------描画初期化処理 ここまで------
 
