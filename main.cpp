@@ -463,15 +463,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
 
 	//減算合成
-	blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT; //減算
-	blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
-	blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
+	//blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT; //減算
+	//blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
+	//blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
 
 
 	 //色反転
-	 //blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
-	 //blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR; //1.0f-デストから－の値
-	 //blenddesc.DestBlend = D3D12_BLEND_ZERO; //使わない
+	 blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
+	 blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR; //1.0f-デストから－の値
+	 blenddesc.DestBlend = D3D12_BLEND_ZERO; //使わない
 
 	 //半透明合成
 	 //blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
@@ -535,7 +535,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
 		//3.画面クリア          R      G      B     A
-		FLOAT clearColor[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+		FLOAT clearColor[] = { 1.0f, 0.0f, 0.0f, 0.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 
