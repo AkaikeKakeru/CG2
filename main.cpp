@@ -761,9 +761,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//定数バッファビュー(CBV)の設定コマンド
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
 
+		//インデックスバッファビューの設定コマンド
+		commandList->IASetIndexBuffer(&ibView);
+
 		//描画コマンド
 		//commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
-		commandList->DrawInstanced(6, 1, 0, 0);//全ての頂点を使って描画
+		//commandList->DrawInstanced(6, 1, 0, 0);//全ての頂点を使って描画
+		commandList->DrawIndexedInstanced(_countof(indices),1,0,0,0);//全ての頂点を使って描画
 
 		//4.ここまで、描画コマンド
 
