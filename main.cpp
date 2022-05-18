@@ -493,7 +493,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ルートシグネチャ
 	ID3D12RootSignature* rootSignature;
 
-	//ルートパラメータの設定
+	////ルートパラメータの設定
 	D3D12_ROOT_PARAMETER rootParam = {};
 	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	//定数バッファビュー
 	rootParam.Descriptor.ShaderRegister = 0;					//定数バッファ番号
@@ -503,7 +503,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ルートシグネチャの設定
 	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
 	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	rootSignatureDesc.pParameters = &rootParam;
+	rootSignatureDesc.pParameters = &rootParam; //ルートパラメータの先頭アドレス
+	rootSignatureDesc.NumParameters = 1; //ルートパラメータ数
 
 	//ルートシグネチャのシリアライズ
 	ID3DBlob* rootSigBlob = nullptr;
