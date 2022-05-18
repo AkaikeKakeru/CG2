@@ -456,7 +456,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD; //ブレンドを有効にする
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE; //加算
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO; //デストの値を 0%使う　
-
+ 
 	//加算合成
 	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
 	//blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
@@ -512,6 +512,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
 
+	//定数バッファ用データ構造体(マテリアル)
+	struct ConstBufferDataMaterial 
+	{
+		XMFLOAT4 color; //色(RGBA)
+	};
+
 	//------描画初期化処理 ここまで------
 
 	//ゲームループ
@@ -534,7 +540,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
 		//3.画面クリア          R      G      B     A
-		FLOAT clearColor[] = { 0.0f, 0.0f, 1.0f, 0.0f };
+		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 
