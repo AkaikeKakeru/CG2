@@ -258,28 +258,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//------DirectX初期化処理 ここまで------
 
 	//------描画初期化処理 ここから------
+	
+	//頂点データ構造体
+	struct Vertex
+	{
+		XMFLOAT3 pos; //xyz座標
+		XMFLOAT2 uv;  //uv座標
+	};
 	//頂点データ
-	//XMFLOAT3 vertices[] = {
-	//	{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
-	//	{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
-	//	{-0.5f, 0.0f,0.0f},//xが-で左、yが0で中 左中
-	//	{+0.5f, 0.0f,0.0f},//xが+で右、yが0で中 右中
-	//	{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
-	//	{+0.5f,+0.5f,0.0f},//xが+で右、yが+で上 右上
-	//};
-
-	XMFLOAT3 vertices[] = {
-		{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
-		{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
-		{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
-		{+0.5f,+0.5f,0.0f},//xが+で右、yが+で上 右上
+	Vertex vertices[] =
+	{
+		//x		 y		z		u	  v
+		{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}},//左下
+		{{-0.4f, +0.7f, 0.0f}, {0.0f, 1.0f}},//左上
+		{{+0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}},//右下
+		{{+0.4f, +0.7f, 0.0f}, {1.0f, 0.0f}},//右上
 	};
 
-	//　インデックスデータ
-	uint16_t indices[] =
+	//インデックスデータ
+	unsigned short indices[] =
 	{
-		0,1,2, // 一つ目
-		1,2,3, // 二つ目
+		0,1,2,//一つ目
+		1,2,3,//二つ目
 	};
 
 	Transform_ transform_ =
@@ -613,6 +613,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	ibView.SizeInBytes = sizeIB;
 
+	
+
 	//------描画初期化処理 ここまで------
 
 	//ゲームループ
@@ -753,7 +755,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->SetGraphicsRootSignature(rootSignature);
 
 		//プリミティブ形状の設定コマンド
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);//三角形リスト
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);//三角形リスト
 
 		//頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
