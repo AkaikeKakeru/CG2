@@ -363,6 +363,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		nullptr,
 		IID_PPV_ARGS(&indexBuff));
 
+	//　インデックスバッファをマッピング
+	uint16_t* indexMap = nullptr;
+	result = indexBuff->Map(0, nullptr, (void**)&indexMap);
+	// 全インデックスに対して
+	for (int i = 0; i < _countof(indices); i++)
+	{
+		indexMap[i] = indices[i]; //インデックスをコピー
+	}
+	//マッピング解除
+	indexBuff->Unmap(0, nullptr);
+
+
 
 	/* verticesに記入 */
 
