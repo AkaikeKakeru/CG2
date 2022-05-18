@@ -270,7 +270,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	{
 		//x		 y		z		u	  v
 		{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}},//左下
-		{{-0.4f, +0.7f, 0.0f}, {0.0f, 1.0f}},//左上
+		{{-0.4f, +0.7f, 0.0f}, {0.0f, 0.0f}},//左上
 		{{+0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}},//右下
 		{{+0.4f, +0.7f, 0.0f}, {1.0f, 0.0f}},//右上
 	};
@@ -362,7 +362,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//頂点バッファのサイズ
 	vbView.SizeInBytes = sizeVB;
 	//頂点１つ分のデータサイズ
-	vbView.StrideInBytes = sizeof(XMFLOAT3);
+	vbView.StrideInBytes = sizeof(vertices[0]);
 
 	ID3DBlob* vsBlob = nullptr;//頂点シェーダオブジェクト
 	ID3DBlob* psBlob = nullptr;//ピクセルシェーダオブジェクト
