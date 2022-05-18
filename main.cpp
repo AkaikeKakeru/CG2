@@ -674,8 +674,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		&textureResourceDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&texBuff);
-	)
+		IID_PPV_ARGS(&texBuff)
+	);
+
+	//テクスチャバッファにデータ転送
+	result = texBuff->WriteToSubresource(
+		0,
+		nullptr,//全領域へコピー
+		imageData,//元データアドレス
+		sizeof(XMFLOAT4) * textureWidth,//1ラインサイズ
+		sizeof(XMFLOAT4) * imageDataCount//全サイズ
+	);
+
+
+	//元データ開放
+	delete[] imageData;
 
 	//------描画初期化処理 ここまで------
 
