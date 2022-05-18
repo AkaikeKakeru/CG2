@@ -259,27 +259,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//------描画初期化処理 ここから------
 	//頂点データ
-	//XMFLOAT3 vertices[] = {
-	//	{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
-	//	{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
-	//	{-0.5f, 0.0f,0.0f},//xが-で左、yが0で中 左中
-	//	{+0.5f, 0.0f,0.0f},//xが+で右、yが0で中 右中
-	//	{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
-	//	{+0.5f,+0.5f,0.0f},//xが+で右、yが+で上 右上
-	//};
-
 	XMFLOAT3 vertices[] = {
 		{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
-		{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
 		{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
+		{-0.5f, 0.0f,0.0f},//xが-で左、yが0で中 左中
+		{+0.5f, 0.0f,0.0f},//xが+で右、yが0で中 右中
+		{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
 		{+0.5f,+0.5f,0.0f},//xが+で右、yが+で上 右上
 	};
+
+	//XMFLOAT3 vertices[] = {
+	//	{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
+	//	{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
+	//	{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
+	//	{+0.5f,+0.5f,0.0f},//xが+で右、yが+で上 右上
+	//};
 
 	//　インデックスデータ
 	uint16_t indices[] =
 	{
-		0,1,2, // 一つ目
-		1,2,3, // 二つ目
+		2,5,4,
+		5,4,3,
+		3,0,1,
+		0,1,2,
+		2,3,5,
 	};
 
 	Transform_ transform_ =
@@ -753,7 +756,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->SetGraphicsRootSignature(rootSignature);
 
 		//プリミティブ形状の設定コマンド
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);//三角形リスト
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);//三角形リスト
 
 		//頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
