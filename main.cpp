@@ -686,9 +686,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		sizeof(XMFLOAT4) * imageDataCount//全サイズ
 	);
 
-
 	//元データ開放
 	delete[] imageData;
+
+
+	//SRVの最大個数
+	const size_t kMaxSRVCount = 2056;
+	
+	//デスクリプタヒープの設定
+	D3D12_DESCRIPTOR_HEAP_DESC srcHeapDesc = {};
+	srcHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srcHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;//シェーダから見えるように
+	srcHeapDesc.NumDescriptors = kMaxSRVCount;
+
+	//設定を基にSRV用デスクリプタヒープを生成
+	ID3D12DescriptorHeap* srvHeap = nullptr;
+	result = device->CreateDescriptorHeap(&srcHeapDesc, IID_PPV_ARGS(&srvHeap));
+	assert(SUCCEEDED(result));
+
 
 	//------描画初期化処理 ここまで------
 
