@@ -451,6 +451,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc = pipelineDesc.BlendState.RenderTarget[0];
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
+	//アルファ値共通設定
+	blenddesc.BlendEnable = true; // ブレンド有効にする
+	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD; //ブレンドを有効にする
+	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE; //加算
+	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO; //テストの値を 0%使う　
+
 	//頂点レイアウトの設定
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 	pipelineDesc.InputLayout.NumElements = _countof(inputLayout);
