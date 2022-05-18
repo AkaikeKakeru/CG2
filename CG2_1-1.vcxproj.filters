@@ -24,8 +24,6 @@
     <FxCompile Include="BasicPS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Basic.hlsli">
-      <Filter>リソース ファイル</Filter>
-    </None>
+    <None Include="Basic.hlsli" />
   </ItemGroup>
 </Project>

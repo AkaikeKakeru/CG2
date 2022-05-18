@@ -14,6 +14,8 @@
 
 #include <dinput.h>
 
+
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
@@ -36,6 +38,9 @@ struct Transform_
 	float Rota;
 	float Scale;
 };
+
+
+
 
 //ウィンドウプロシージャ
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
