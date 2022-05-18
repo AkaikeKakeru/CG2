@@ -545,10 +545,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	////定数バッファのマッピング
-	//ConstBufferDataMaterial* constMapMaterial = nullptr;
-	//result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial); //マッピング
+	ConstBufferDataMaterial* constMapMaterial = nullptr;
+	result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial); //マッピング
+	assert(SUCCEEDED(result));
 
-
+	// 値を書き込むと自動的に転送される
+	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f); //RGBAで半透明の赤
 
 	//------描画初期化処理 ここまで------
 
