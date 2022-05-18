@@ -261,15 +261,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//頂点データ
 	XMFLOAT3 vertices[] = {
 		{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
-		{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
 		{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
+		{-0.5f, 0.0f,0.0f},//xが-で左、yが0で中 左中
+		{+0.5f, 0.0f,0.0f},//xが+で右、yが0で中 右中
+		{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
+		{+0.5f,+0.5f,0.0f},//xが+で右、yが+で上 右上
 	};
 
-	XMFLOAT3 verticesOrigin[] = {
-		{-0.5f,-0.5f,0.0f},//xが-で左、yが-で下 左下
-		{-0.5f,+0.5f,0.0f},//xが-で左、yが+で上 左上
-		{+0.5f,-0.5f,0.0f},//xが+で右、yが-で下 右下
-	};
 
 
 	Transform_ transform_ =
@@ -605,76 +603,76 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		keyboard->GetDeviceState(sizeof(key), key);
 
 
-		transform_.Trans_.x = 0.0f;
-		transform_.Trans_.y = 0.0f;
+		//transform_.Trans_.x = 0.0f;
+		//transform_.Trans_.y = 0.0f;
 
-		transform_.Rota = 0.0f;
+		//transform_.Rota = 0.0f;
 
-		transform_.Scale = 1.0f;
+		//transform_.Scale = 1.0f;
 
 
-		if(key[DIK_D])
-		{
-			transform_.Trans_.x += 0.05f;
-		}
-		if(key[DIK_A])
-		{
-			transform_.Trans_.x -= 0.05f;
-		}
+		//if(key[DIK_D])
+		//{
+		//	transform_.Trans_.x += 0.05f;
+		//}
+		//if(key[DIK_A])
+		//{
+		//	transform_.Trans_.x -= 0.05f;
+		//}
 
-		if(key[DIK_W])
-		{
-			transform_.Trans_.y += 0.05f;
-		}
-		if(key[DIK_S])
-		{
-			transform_.Trans_.y -= 0.05f;
-		}
+		//if(key[DIK_W])
+		//{
+		//	transform_.Trans_.y += 0.05f;
+		//}
+		//if(key[DIK_S])
+		//{
+		//	transform_.Trans_.y -= 0.05f;
+		//}
 
-		if(key[DIK_Q])
-		{
-			transform_.Rota -= PI / 32;
-		}
-		if(key[DIK_E])
-		{
-			transform_.Rota += PI / 32;
-		}
+		//if(key[DIK_Q])
+		//{
+		//	transform_.Rota -= PI / 32;
+		//}
+		//if(key[DIK_E])
+		//{
+		//	transform_.Rota += PI / 32;
+		//}
 
-		if(key[DIK_Z])
-		{
-			transform_.Scale -= 0.1f;
-		}
-		if(key[DIK_C])
-		{
-			transform_.Scale += 0.1f;
-		}
+		//if(key[DIK_Z])
+		//{
+		//	transform_.Scale -= 0.1f;
+		//}
+		//if(key[DIK_C])
+		//{
+		//	transform_.Scale += 0.1f;
+		//}
 
-			affine[0][0] = transform_.Scale * cos(transform_.Rota);
-			affine[0][1] = transform_.Scale * ( - sin(transform_.Rota));
-			affine[0][2] = transform_.Trans_.x;
+		//	affine[0][0] = transform_.Scale * cos(transform_.Rota);
+		//	affine[0][1] = transform_.Scale * ( - sin(transform_.Rota));
+		//	affine[0][2] = transform_.Trans_.x;
 
-			affine[1][0] = transform_.Scale * sin(transform_.Rota);
-			affine[1][1] = transform_.Scale * cos(transform_.Rota);
-			affine[1][2] = transform_.Trans_.y;
+		//	affine[1][0] = transform_.Scale * sin(transform_.Rota);
+		//	affine[1][1] = transform_.Scale * cos(transform_.Rota);
+		//	affine[1][2] = transform_.Trans_.y;
 
-			affine[2][0] = 0.0f;
-			affine[2][1] = 0.0f;
-			affine[2][2] = 1.0f;
+		//	affine[2][0] = 0.0f;
+		//	affine[2][1] = 0.0f;
+		//	affine[2][2] = 1.0f;
 
-		for (int i = 0; i < _countof(vertices); i++)
-		{
-			vertices[i].x = vertices[i].x * affine[0][0] +
-							vertices[i].y * affine[0][1] +
-									 1.0f * affine[0][2];
+		//for (int i = 0; i < _countof(vertices); i++)
+		//{
+		//	vertices[i].x = vertices[i].x * affine[0][0] +
+		//					vertices[i].y * affine[0][1] +
+		//							 1.0f * affine[0][2];
 
-			vertices[i].y = vertices[i].x * affine[1][0] +
-							vertices[i].y * affine[1][1] +
-									 1.0f * affine[1][2];
+		//	vertices[i].y = vertices[i].x * affine[1][0] +
+		//					vertices[i].y * affine[1][1] +
+		//							 1.0f * affine[1][2];
 
-			vertices[i].z = vertices[i].x * affine[2][0] +
-							vertices[i].y * affine[2][1] +
-									 1.0f * affine[2][2];
-		}
+		//	vertices[i].z = vertices[i].x * affine[2][0] +
+		//					vertices[i].y * affine[2][1] +
+		//							 1.0f * affine[2][2];
+		//}
 
 		//全頂点に対して
 		for (int i = 0; i < _countof(vertices); i++)
@@ -719,7 +717,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
 
 		//描画コマンド
-		commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
+		//commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
+		commandList->DrawInstanced(6, 1, 0, 0);//全ての頂点を使って描画
 
 		//4.ここまで、描画コマンド
 
