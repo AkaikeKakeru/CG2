@@ -419,19 +419,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	//頂点レイアウト
-	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] = 
+	{
 		{
-			"POSITION",								//セマンティック名
-			0,										//同じセマンティック名が複数あるときに使うインデックス(0でよい)
-			DXGI_FORMAT_R32G32B32_FLOAT,			//要素数とビット数を表す　(XYZの3つでfloat型なのでR32G32B32_FLOAT
-			0,										//入力スロットインデックス(0でよい)
-		D3D12_APPEND_ALIGNED_ELEMENT,				//データのオフセット値　(D3D12_APPEND_ALIGNED_ELEMENTだと自動設定)
-		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	//入力データ種別　(標準はD3D12_INPUT_CLASSIFICATION_PER_VERTEX_DAT
-		0											//一度に描画するインスタンス数(0でよい)
+			//xyz座標
+			"POSITION",									//セマンティック名
+			0,											//同じセマンティック名が複数あるときに使うインデックス(0でよい)
+			DXGI_FORMAT_R32G32B32_FLOAT,				//要素数とビット数を表す　(XYZの3つでfloat型なのでR32G32B32_FLOAT
+			0,											//入力スロットインデックス(0でよい)
+			D3D12_APPEND_ALIGNED_ELEMENT,				//データのオフセット値　(D3D12_APPEND_ALIGNED_ELEMENTだと自動設定)
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	//入力データ種別　(標準はD3D12_INPUT_CLASSIFICATION_PER_VERTEX_DAT
+			0											//一度に描画するインスタンス数(0でよい)
 		},//(1行で書いた方が見やすいかも)
 
 		//座標以外に 色、テクスチャUIなどを渡す場合はさらに続ける
-		//{/*...*/},
+		{
+			//UV座標
+			"TEXCOORD",
+			0,
+			DXGI_FORMAT_R32G32_FLOAT,
+			0,
+			D3D12_APPEND_ALIGNED_ELEMENT,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+			0,
+		},
 		//{/*...*/},
 	};
 
@@ -755,7 +766,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->SetGraphicsRootSignature(rootSignature);
 
 		//プリミティブ形状の設定コマンド
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);//三角形リスト
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);//三角形リスト
 
 		//頂点バッファビューの設定コマンド
 		commandList->IASetVertexBuffers(0, 1, &vbView);
