@@ -457,6 +457,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE; //加算
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO; //テストの値を 0%使う　
 
+	//加算合成
+	blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
+	blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
+	blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
+
 	//頂点レイアウトの設定
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 	pipelineDesc.InputLayout.NumElements = _countof(inputLayout);
@@ -514,7 +519,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
 		//3.画面クリア          R      G      B     A
-		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
+		FLOAT clearColor[] = { 0.0f, 0.0f, 0.1f, 0.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 
