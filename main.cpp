@@ -516,6 +516,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//0～255指定のRGBA
 	pipelineDesc.SampleDesc.Count = 1;//1ピクセルにつき1回サンプリング
 
+
+	//デスクリプタレンジの設定
+	D3D12_DESCRIPTOR_RANGE descriptorRange{};
+	descriptorRange.NumDescriptors = 1;//一度の描画に使うテクスチャが一枚なので1
+	descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRange.BaseShaderRegister = 0;//テクスチャレジスタ番号0番
+	descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+
+
 	//ルートシグネチャ
 	ID3D12RootSignature* rootSignature;
 
@@ -717,7 +727,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ハンドルの指す位置にシェーダーリソースビュー作成
 	device->CreateShaderResourceView(texBuff, &srvDesc, srvHandle);
 
+	////CBV,SRV,UAVの1個分のサイズを取得
+	//UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	////SRVヒープの先頭ハンドルを取得
+	//D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
+	////ハンドルを一つ進める(SRVの位置)
+	//srvHandle.ptr += descriptorSize * 1;
 
+	////CBV(コンスタントバッファビュー)の設定
+	//D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+	////cbvDescの値設定(省略)
+	//device->CreateConstantBufferView(&cbvDesc, srvHandle);
 
 	//------描画初期化処理 ここまで------
 
