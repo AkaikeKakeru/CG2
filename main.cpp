@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <DirectXMath.h>
+#include <DirectXTex.h>
 
 #include <vector>
 #include <string>
