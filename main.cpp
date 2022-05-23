@@ -706,6 +706,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		&metadata, scratchImg
 	);
 
+	ScratchImage mipChine{};
+	//ミップマップ生成
+	result = GenerateMipMaps(
+		scratchImg.GetImages(), scratchImg.GetImageCount(), scratchImg.GetMetadata(),
+		TEX_FILTER_DEFAULT, 0, mipChine);
+	if (SUCCEEDED(result)) {
+		scratchImg = std::move(mipChine);
+		metadata = scratchImg.GetMetadata();
+	}
+
 
 	//ヒープ設定
 	D3D12_HEAP_PROPERTIES textureHeapProp{};
