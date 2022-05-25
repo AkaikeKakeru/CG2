@@ -716,6 +716,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		metadata = scratchImg.GetMetadata();
 	}
 
+	//読み込んだでデイヒューズテクスチャをSRGBとして扱う
+	metadata.format = MakeSRGB(metadata.format);
+
 
 	//ヒープ設定
 	D3D12_HEAP_PROPERTIES textureHeapProp{};
