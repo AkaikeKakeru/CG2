@@ -749,14 +749,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		IID_PPV_ARGS(&texBuff)
 	);
 
-	//テクスチャバッファにデータ転送
-	result = texBuff->WriteToSubresource(
-		0,
-		nullptr,//全領域へコピー
-		imageData,//元データアドレス
-		sizeof(XMFLOAT4) * textureWidth,//1ラインサイズ
-		sizeof(XMFLOAT4) * imageDataCount//全サイズ
-	);
+	//全ミップマップについて
+	for (size_t i = 0; i < metadata.mipLevels; i++)
+	{
+		//ミップマップレベルを指定してイメージを取得
+		const Image* img = scratchImg.GetImage(i, 0, 0);
+		//テクスチャバッファにデータ転送
+		result = texBuff->WriteToSubresource(
+			(UINT)i,
+			nullptr,//全領域へコピー
+			img->pixels,//元データアドレス
+			(UINT)img->rowPitch,//1ラインサイズ
+			(UINT)img->slicePitch//一枚サイズ
+		);
+		assert(SUCCEEDED(result));
+	}
 
 	//元データ開放
 	delete[] imageData;
