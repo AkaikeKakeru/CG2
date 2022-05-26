@@ -4,7 +4,6 @@
 #include <DirectXMath.h>
 #include <DirectXTex.h>
 
-
 #include <vector>
 #include <string>
 
@@ -16,8 +15,6 @@
 
 #include <dinput.h>
 
-#include "Struct.h"
-#include "Object.h"
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -29,6 +26,22 @@
 #pragma comment(lib,"dxguid.lib")
 
 using namespace DirectX;
+
+struct Direction_
+{
+	float x;
+	float y;
+};
+
+struct Transform_
+{
+	Direction_ Trans_;
+	float Rota;
+	float Scale;
+};
+
+
+
 
 //ウィンドウプロシージャ
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
@@ -259,73 +272,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMFLOAT3 pos; //xyz座標
 		XMFLOAT2 uv;  //uv座標
 	};
-
-	Object* object = new Object();
-	//Object* objectArr[10] = new Object();
-
-	/*for (int i = 0; i < 10; i++)
-	{
-		objectArr[i]->transform_.Trans_.x = object.transform_.Trans_.x;
-		objectArr[i]->transform_.Trans_.y = object.transform_.Trans_.y;
-		objectArr[i]->transform_.Trans_.z = object.transform_.Trans_.z;
-	}*/
-
 	//頂点データ
-	//Vertex vertices[] =
-	//{
-	//	//x		 y		z		u	  v
-	//	{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}},//左下
-	//	{{-0.4f, +0.7f, 0.0f}, {0.0f, 0.0f}},//左上
-	//	{{+0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}},//右下
-	//	{{+0.4f, +0.7f, 0.0f}, {1.0f, 0.0f}},//右上
-	//};
-
 	Vertex vertices[] =
 	{
-		//x		 y		z						u	  v
-		{{  -object->transform_.direction_.x, 
-			-object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {0.0f, 1.0f}},//左下
-
-		{{  -object->transform_.direction_.x, 
-			+object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {0.0f, 0.0f}},//左上
-
-		{{  +object->transform_.direction_.x, 
-			-object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {1.0f, 1.0f}},//右下
-
-		{{  +object->transform_.direction_.x, 
-			+object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {1.0f, 0.0f}},//右上
+		//x		 y		z		u	  v
+		{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}},//左下
+		{{-0.4f, +0.7f, 0.0f}, {0.0f, 0.0f}},//左上
+		{{+0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}},//右下
+		{{+0.4f, +0.7f, 0.0f}, {1.0f, 0.0f}},//右上
 	};
-
 
 	//インデックスデータ
 	unsigned short indices[] =
 	{
 		0,1,2,//一つ目
 		1,2,3,//二つ目
-		2,3,0,
-		3,0,1,
 	};
 
-	//Transform transform_ =
-	//{
+	Transform_ transform_ =
+	{
 
-	//	{
-	//		0.0f,0.0f
-	//	},
+		{
+			0.0f,0.0f
+		},
 
-	//		{
-	//			0.0f,
-	//		},
+			{
+				0.0f,
+			},
 
-	//		{
-	//			1.0f,
-	//		},
+			{
+				1.0f,
+			},
 
-	//};
+	};
 
 	//アフィン
 	float affine[3][3] =
@@ -375,11 +354,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	/* verticesに記入 */
 
-	//全頂点に対して
-	for (int i = 0; i < _countof(vertices); i++)
-	{
-		vertMap[i] = vertices[i];//座標をコピー
-	}
+	////全頂点に対して
+	//for (int i = 0; i < _countof(vertices); i++)
+	//{
+	//	vertMap[i] = vertices[i];//座標をコピー
+	//}
 
 	//繋がりを解除
 	vertBuff->Unmap(0, nullptr);
@@ -541,6 +520,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.SampleDesc.Count = 1;//1ピクセルにつき1回サンプリング
 
 
+
+
+
 	//ルートシグネチャ
 	ID3D12RootSignature* rootSignature;
 
@@ -652,11 +634,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	// 値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f); //RGBAで半透明の赤
+	constMapMaterial->color = XMFLOAT4(0, 0, 0, 1); //RGBAで半透明の赤
 
 
 
-	// インデックスデータ全体のサイズ
+													   // インデックスデータ全体のサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * _countof(indices));
 
 	// リソース設定
@@ -696,12 +678,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ibView.SizeInBytes = sizeIB;
 
 
+	////横方向ピクセル数
+	//const size_t textureWidth = 256;
+	////縦方向ピクセル数
+	//const size_t textureHeight = 256;
+	////配列の要素数
+	//const size_t imageDataCount = textureWidth * textureHeight;
+	////画像のイメージデータ配列
+	//XMFLOAT4* imageData = new XMFLOAT4[imageDataCount];//必ず後で開放する
+	//
+	////全ピクセルの色を初期化
+	//for (size_t i = 0; i < imageDataCount; i++)
+	//{
+	//	imageData[i].x = 1.0f; //R
+	//	imageData[i].y = 0.0f; //G
+	//	imageData[i].z = 0.0f; //B
+	//	imageData[i].w = 1.0f; //A
+	//}
+
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
 	//WICテクスチャのロード
 	result = LoadFromWICFile(
-		L"Resources/block.png",
+		L"Resources/texture.png",
 		WIC_FLAGS_NONE,
 		&metadata, scratchImg
 	);
@@ -919,6 +919,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//}
 
 
+
 		//全頂点に対して
 		for (int i = 0; i < _countof(vertices); i++)
 		{
@@ -973,9 +974,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->IASetIndexBuffer(&ibView);
 
 		//描画コマンド
-		commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
+		//commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
 		//commandList->DrawInstanced(6, 1, 0, 0);//全ての頂点を使って描画
-		//commandList->DrawIndexedInstanced(_countof(indices),1,0,0,0);//全ての頂点を使って描画
+		commandList->DrawIndexedInstanced(_countof(indices),1,0,0,0);//全ての頂点を使って描画
 
 		//4.ここまで、描画コマンド
 
