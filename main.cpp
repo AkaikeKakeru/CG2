@@ -260,7 +260,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMFLOAT2 uv;  //uv座標
 	};
 
-	Object* object = new Object();
+	//Object* object = new Object();
 	//Object* objectArr[10] = new Object();
 
 	/*for (int i = 0; i < 10; i++)
@@ -271,34 +271,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}*/
 
 	//頂点データ
-	//Vertex vertices[] =
-	//{
-	//	//x		 y		z		u	  v
-	//	{{-0.4f, -0.7f, 0.0f}, {0.0f, 1.0f}},//左下
-	//	{{-0.4f, +0.7f, 0.0f}, {0.0f, 0.0f}},//左上
-	//	{{+0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}},//右下
-	//	{{+0.4f, +0.7f, 0.0f}, {1.0f, 0.0f}},//右上
-	//};
-
 	Vertex vertices[] =
 	{
-		//x		 y		z						u	  v
-		{{  -object->transform_.direction_.x, 
-			-object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {0.0f, 1.0f}},//左下
-
-		{{  -object->transform_.direction_.x, 
-			+object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {0.0f, 0.0f}},//左上
-
-		{{  +object->transform_.direction_.x, 
-			-object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {1.0f, 1.0f}},//右下
-
-		{{  +object->transform_.direction_.x, 
-			+object->transform_.direction_.y, 
-			 object->transform_.direction_.z}, {1.0f, 0.0f}},//右上
+		//x		 y		z		u	  v
+		{{  0.0f, 100.0f, 0.0f}, {0.0f, 1.0f}},//左下
+		{{  0.0f,   0.0f, 0.0f}, {0.0f, 0.0f}},//左上
+		{{100.0f, 100.0f, 0.0f}, {1.0f, 1.0f}},//右下
+		{{100.0f,   0.0f, 0.0f}, {1.0f, 0.0f}},//右上
 	};
+
+	//Vertex vertices[] =
+	//{
+	//	//x		 y		z						u	  v
+	//	{{  -object->transform_.direction_.x, 
+	//		-object->transform_.direction_.y, 
+	//		 object->transform_.direction_.z}, {0.0f, 1.0f}},//左下
+
+	//	{{  -object->transform_.direction_.x, 
+	//		+object->transform_.direction_.y, 
+	//		 object->transform_.direction_.z}, {0.0f, 0.0f}},//左上
+
+	//	{{  +object->transform_.direction_.x, 
+	//		-object->transform_.direction_.y, 
+	//		 object->transform_.direction_.z}, {1.0f, 1.0f}},//右下
+
+	//	{{  +object->transform_.direction_.x, 
+	//		+object->transform_.direction_.y, 
+	//		 object->transform_.direction_.z}, {1.0f, 0.0f}},//右上
+	//};
 
 
 	//インデックスデータ
