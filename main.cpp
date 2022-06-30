@@ -511,19 +511,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 #pragma region アルファ値共通設定
 	//
-	blenddesc.BlendEnable = true; // ブレンド有効にする
+	blenddesc.BlendEnable = false; // ブレンド有効にする
 	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD; //ブレンドを有効にする
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE; //加算
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO; //デストの値を 0%使う　
 #pragma endregion
 
+#pragma region 加算合成
+
+	//加算合成
+	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
+	//blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
+	//blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
+#pragma endregion
 #pragma region 今使ってない合成
-
-												 //加算合成
-												 //blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
-												 //blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
-												 //blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
-
 												 //減算合成
 												 //blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT; //減算
 												 //blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
@@ -540,6 +541,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値をアルファ値
 	blenddesc.DestBlend = D3D12_BLEND_ONE; //1.0f-ソースのアルファ値
 #pragma endregion
+
 #pragma region 頂点レイアウトの設定
 										   //
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
@@ -668,7 +670,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	// 値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f); //RGBAで半透明の赤
+	constMapMaterial->color = XMFLOAT4(1, 1, 1, 1.0f); //RGBAで半透明の赤
 
   // インデックスデータ全体のサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * _countof(indices));
@@ -723,10 +725,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//全ピクセルの色を初期化
 	for (size_t i = 0; i < imageDataCount; i++)
 	{
-		imageData[i].x = 1.0f; //R
-		imageData[i].y = 1.0f; //G
+		imageData[i].x = 0.0f; //R
+		imageData[i].y = 0.0f; //G
 		imageData[i].z = 0.0f; //B
-		imageData[i].w = 1.0f; //A
+		imageData[i].w = 0.0f; //A
 	}
 
 	TexMetadata metadata{};
@@ -885,7 +887,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
 		//3.画面クリア          R      G      B     A
-		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
+		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.5f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 
@@ -979,7 +981,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if(vertices[i].uv.x > 8.0f)
 			{
 				vertices[i].uv.x = defo.x;
-			}*/
+			}
+			
+
+
+			float scroll = 0.001f;
+			float2 defo = input.uv;
+
+			input.uv.x += scroll;
+
+			if (input.uv.x > 8.0f)
+			{
+			input.uv.x = defo.x;
+			}
+
+			
+			*/
 
 			vertMap[i] = vertices[i];//座標をコピー
 		}
