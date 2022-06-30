@@ -627,8 +627,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMMATRIX mat; //3D変換行列
 	};
 
-	/*ID3D12Resource* constBufferMaterial = nullptr;
-	ConstBufferDataTransform* constMapMaterial = nullptr;*/
+
+	ID3D12Resource* constBuffTransform = nullptr;
+	ConstBufferDataTransform* constMapTransform = nullptr;
 
 	
 
@@ -685,7 +686,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-		ID3D12Resource* constBuffTransform = nullptr;
+		//ID3D12Resource* constBuffTransform = nullptr;
 		//定数バッファの生成
 		result = device->CreateCommittedResource(
 			&cbHeapProp, //ヒープ設定
@@ -697,9 +698,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		assert(SUCCEEDED(result));
 
 		//定数バッファのマッピング
-		ConstBufferDataMaterial* constMapTransform = nullptr;
 		result = constBuffTransform->Map(0, nullptr, (void**)&constMapTransform); //マッピング
 		assert(SUCCEEDED(result));
+
+		//単位行列を代入
+		constMapTransform->mat = XMMatrixIdentity();
 
 	// 値を書き込むと自動的に転送される
 	constMapMaterial->color = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f); //RGBAで半透明の赤
