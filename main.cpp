@@ -733,7 +733,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		 matWorld *= matRot; //ワールド行列に回転を反映
 #pragma endregion
 
-
+#pragma region トランスレーション
+		 XMMATRIX matTrans; //平行移動行列
+		 matTrans = XMMatrixTranslation(-50.0f, 0, 0);
+		 matWorld *= matTrans; //ワールド行列に平行移動を反映
+#pragma endregion
 
 #pragma endregion
 
