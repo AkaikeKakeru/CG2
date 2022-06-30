@@ -620,13 +620,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMFLOAT4 color; //色(RGBA)
 	};
 
+	//資料05-02で追加
+#pragma region 3D変換行列
+	//定数バッファ用データ構造体(3D変換行列)
+	struct ConstBufferDataTransform {
+		XMMATRIX mat; //3D変換行列
+	};
+
+	ID3D12Resource* constBufferTransform = nullptr;
+	ConstBufferDataTransform* constMapTransform = nullptr;
+
+#pragma endregion
 	//ヒープ設定
 	D3D12_HEAP_PROPERTIES cbHeapProp{};
 	cbHeapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
 	//リソース設定
 	D3D12_RESOURCE_DESC cbResourceDesc{};
 	cbResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	cbResourceDesc.Width = (sizeof(ConstBufferDataMaterial) + 0xff) & ~0xff; //256バイトアラインメント
+	cbResourceDesc.Width = (sizeof(ConstBufferDataTransform) + 0xff) & ~0xff; //256バイトアラインメント
 	cbResourceDesc.Height = 1;
 	cbResourceDesc.DepthOrArraySize = 1;
 	cbResourceDesc.MipLevels = 1;
@@ -641,7 +652,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		&cbResourceDesc, //リソース設定
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&constBuffMaterial));
+		IID_PPV_ARGS(&constBufferTransform));
 	assert(SUCCEEDED(result));
 
 
@@ -846,6 +857,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		BYTE key[256] = {};
 		keyboard->GetDeviceState(sizeof(key), key);
 
+#pragma region transform関連
 
 		//transform_.Trans_.x = 0.0f;
 		//transform_.Trans_.y = 0.0f;
@@ -917,7 +929,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//					vertices[i].y * affine[2][1] +
 		//							 1.0f * affine[2][2];
 		//}
-
+#pragma endregion
 
 		//全頂点に対して
 		for (int i = 0; i < _countof(vertices); i++)
