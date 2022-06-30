@@ -736,6 +736,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			 0.1f, 1000.0f
 		 );//前端、奥端
 
+#pragma region ビュー行列の作成
+		 XMMATRIX matView;
+		 XMFLOAT3 eye(0, 0, -100);	//視点座標
+		 XMFLOAT3 target(0, 0, 0);	//注視点座標
+		 XMFLOAT3 up(0, 1, 0);		//上方向ベクトル
+		 matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
+			 XMLoadFloat3(&target), XMLoadFloat3(&eye));
+#pragma endregion
+
 		 constMapTransform->mat = matProjection;
 #pragma endregion
 
