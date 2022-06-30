@@ -260,16 +260,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMFLOAT2 uv;  //uv座標
 	};
 
-	//Object* object = new Object();
-	//Object* objectArr[10] = new Object();
-
-	/*for (int i = 0; i < 10; i++)
-	{
-		objectArr[i]->transform_.Trans_.x = object.transform_.Trans_.x;
-		objectArr[i]->transform_.Trans_.y = object.transform_.Trans_.y;
-		objectArr[i]->transform_.Trans_.z = object.transform_.Trans_.z;
-	}*/
-
 	//頂点データ
 	Vertex vertices[] =
 	{
@@ -280,26 +270,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{{ 50.0f,  50.0f, 0.0f}, {1.0f, 0.0f}},//右上
 	};
 
-	//Vertex vertices[] =
-	//{
-	//	//x		 y		z						u	  v
-	//	{{  -object->transform_.direction_.x, 
-	//		-object->transform_.direction_.y, 
-	//		 object->transform_.direction_.z}, {0.0f, 1.0f}},//左下
-
-	//	{{  -object->transform_.direction_.x, 
-	//		+object->transform_.direction_.y, 
-	//		 object->transform_.direction_.z}, {0.0f, 0.0f}},//左上
-
-	//	{{  +object->transform_.direction_.x, 
-	//		-object->transform_.direction_.y, 
-	//		 object->transform_.direction_.z}, {1.0f, 1.0f}},//右下
-
-	//	{{  +object->transform_.direction_.x, 
-	//		+object->transform_.direction_.y, 
-	//		 object->transform_.direction_.z}, {1.0f, 0.0f}},//右上
-	//};
-
 
 	//インデックスデータ
 	unsigned short indices[] =
@@ -309,6 +279,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		2,3,0,
 		3,0,1,
 	};
+
+	
 
 	//Transform transform_ =
 	//{
@@ -326,6 +298,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//		},
 
 	//};
+
 
 	//アフィン
 	float affine[3][3] =
@@ -739,10 +712,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma endregion
 
-
-		 constMapTransform->mat = matView * matProjection;
 #pragma endregion
 
+#pragma region ワールド変換行列
+		 XMMATRIX matWorld;
+		 matWorld = XMMatrixIdentity();
+#pragma endregion
+
+		 constMapTransform->mat = matWorld * matView * matProjection;
 #pragma endregion
 
 	// 値を書き込むと自動的に転送される
@@ -912,6 +889,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//device->CreateConstantBufferView(&cbvDesc, srvHandle);
 
 	//------描画初期化処理 ここまで------
+		
+	static float angle = 0.0f; //カメラの回転角
 
 	//ゲームループ
 	while (true) {
@@ -1019,7 +998,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma ターゲットの周りを回るカメラ
 
-		static float angle = 0.0f; //カメラの回転角
+		
 
 		if(key[DIK_D] || key[DIK_A])
 		{
