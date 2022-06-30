@@ -274,10 +274,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vertex vertices[] =
 	{
 		//x		 y		z		u	  v
-		{{-50.0f, -50.0f, 50.0f}, {0.0f, 1.0f}},//左下
-		{{-50.0f,  50.0f, 50.0f}, {0.0f, 0.0f}},//左上
-		{{ 50.0f, -50.0f, 50.0f}, {1.0f, 1.0f}},//右下
-		{{ 50.0f,  50.0f, 50.0f}, {1.0f, 0.0f}},//右上
+		{{-50.0f, -50.0f, 0.0f}, {0.0f, 1.0f}},//左下
+		{{-50.0f,  50.0f, 0.0f}, {0.0f, 0.0f}},//左上
+		{{ 50.0f, -50.0f, 0.0f}, {1.0f, 1.0f}},//右下
+		{{ 50.0f,  50.0f, 0.0f}, {1.0f, 0.0f}},//右上
 	};
 
 	//Vertex vertices[] =
@@ -711,15 +711,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//単位行列を代入
 		constMapTransform->mat = XMMatrixIdentity();
 
-		XMMATRIX oldVer = XMMatrixIdentity();
-
 #pragma region 単位行列で埋めた後
 #pragma region 平行投影行列の計算
-
-		/*constMapTransform->mat.r[0].m128_f32[0] = 2.0f / window_width;
-		constMapTransform->mat.r[1].m128_f32[1] = -2.0f / window_height;
-		constMapTransform->mat.r[3].m128_f32[0] = -1.0f;
-		constMapTransform->mat.r[3].m128_f32[1] = 1.0f;*/
 
 		//DirectXMathで用意されている関数に置き換え
 		 constMapTransform->mat = XMMatrixOrthographicOffCenterLH(
@@ -730,7 +723,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 投資投影変換行列の計算
 
 		 XMMATRIX matProjection =
-			 XMMatrixPerspectiveLH(
+			 XMMatrixPerspectiveFovLH(
 			 XMConvertToRadians(45.0f),//上下画角45度
 			 (float)window_width / window_height,//アスペクト比(画面横幅/画面縦幅)
 			 0.1f, 1000.0f
@@ -738,14 +731,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region ビュー行列の作成
 		 XMMATRIX matView;
-		 XMFLOAT3 eye(0, 0, -100);	//視点座標
+		 XMFLOAT3 eye(100, -80, -100);	//視点座標
 		 XMFLOAT3 target(0, 0, 0);	//注視点座標
 		 XMFLOAT3 up(0, 1, 0);		//上方向ベクトル
 		 matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
-			 XMLoadFloat3(&target), XMLoadFloat3(&eye));
+			 XMLoadFloat3(&target), XMLoadFloat3(&up));
+
 #pragma endregion
 
-		 constMapTransform->mat = matProjection;
+
+		 constMapTransform->mat = matView * matProjection;
 #pragma endregion
 
 #pragma endregion
@@ -1020,6 +1015,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//					vertices[i].y * affine[2][1] +
 		//							 1.0f * affine[2][2];
 		//}
+#pragma endregion
+
+#pragma ターゲットの周りを回るカメラ
+
+		static float angle = 0.0f; //カメラの回転角
+
+		if(key[DIK_D] || key[DIK_A])
+		{
+			if(key[DIK_D]) { angle += XMConvertToRadians(1.0f);}
+			else if(key[DIK_A]) { angle -= XMConvertToRadians(1.0f);}
+		
+			//angleラジアンだけY軸周りに回転、半径は-100
+			eye.x = -100 * sinf(angle);
+			eye.z = -100 * cosf(angle);
+			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
+				XMLoadFloat3(&target), XMLoadFloat3(&up));
+
+			constMapTransform->mat = matView * matProjection;
+		}
 #pragma endregion
 
 		//全頂点に対して
