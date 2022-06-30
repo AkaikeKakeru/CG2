@@ -721,8 +721,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region スケーリング
 		 XMMATRIX matScale; //スケーリング行列
 		 matScale = XMMatrixScaling(1.0f, 0.5f, 1.0f);
-		 matWorld += matScale; //ワールド行列にスケーリングを反映
+		 matWorld *= matScale; //ワールド行列にスケーリングを反映
 #pragma endregion
+
+#pragma region ローテーション
+		 XMMATRIX matRot; //回転行列
+		 matRot = XMMatrixIdentity();
+		 matRot += XMMatrixRotationZ(XMConvertToRadians(0.0f));//Z軸周りに回転
+		 matRot += XMMatrixRotationX(XMConvertToRadians(15.0f));//Y軸周りに回転
+		 matRot += XMMatrixRotationY(XMConvertToRadians(30.0f));//X軸周りに回転
+		 matWorld *= matRot; //ワールド行列に回転を反映
+#pragma endregion
+
+
+
 #pragma endregion
 
 		 constMapTransform->mat = matWorld * matView * matProjection;
