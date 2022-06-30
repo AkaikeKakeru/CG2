@@ -670,7 +670,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	// 値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1, 1, 1, 1.0f); //RGBAで半透明の赤
+	constMapMaterial->color = XMFLOAT4(1, 1, 1, 0.0f); //RGBAで半透明の赤
 
   // インデックスデータ全体のサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * _countof(indices));
