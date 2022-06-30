@@ -15,7 +15,7 @@
 
 #include <dinput.h>
 
-
+#include <time.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -199,7 +199,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	swapChainDesc.BufferCount = 2;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-	
+
 	//スワップチェーンの生成
 	result = dxgiFactry->CreateSwapChainForHwnd(
 		commandQueue, hwnd, &swapChainDesc, nullptr, nullptr,
@@ -224,7 +224,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		swapChain->GetBuffer((UINT)i, IID_PPV_ARGS(&backBuffers[i]));
 		//デスクリプタヒープのハンドルを取得
 		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-		//裏か表化でアドレスがズレる
+		//裏か表かでアドレスがズレる
 		rtvHandle.ptr += i * device->GetDescriptorHandleIncrementSize(rtvHeapDesc.Type);
 		//レンダ―ターゲットビューの設定
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
@@ -265,8 +265,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//------DirectX初期化処理 ここまで------
 
 	//------描画初期化処理 ここから------
-	
+
 	//頂点データ構造体
+
+	struct Vec3
+	{
+		float x;
+		float y;
+		float z;
+	};
+
 	struct Vertex
 	{
 		XMFLOAT3 pos; //xyz座標
@@ -281,6 +289,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{{+0.4f, -0.7f, 0.0f}, {1.0f, 1.0f}},//右下
 		{{+0.4f, +0.7f, 0.0f}, {1.0f, 0.0f}},//右上
 	};
+
+	float scroll = 0.001f;
+	Vec3 defo = { vertices[0].uv.x, vertices[0].uv.y, 0.0f};
 
 	//インデックスデータ
 	unsigned short indices[] =
@@ -332,6 +343,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	resDesc.SampleDesc.Count = 1;
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
+
+
 	//頂点バッファの生成
 	ID3D12Resource* vertBuff = nullptr;
 	result = device->CreateCommittedResource(
@@ -348,7 +361,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	assert(SUCCEEDED(result));
 
-;
+	//;
 
 
 
@@ -427,7 +440,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	//頂点レイアウト
-	D3D12_INPUT_ELEMENT_DESC inputLayout[] = 
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{
 		{
 			//xyz座標
@@ -451,77 +464,100 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
 			0,
 		},
-		//{/*...*/},
+
+		//{
+		//	"TEXCOORD",
+		//	0,
+		//	DXGI_FORMAT_R32G32_FLOAT,
+		//	0,
+		//	D3D12_APPEND_ALIGNED_ELEMENT,
+		//	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+		//	0,
+		//},
 	};
 
 	//グラフィックスパイプライン設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc{};
+#pragma region シェーダーの設定
 
-	//シェーダーの設定
 	pipelineDesc.VS.pShaderBytecode = vsBlob->GetBufferPointer();
 	pipelineDesc.VS.BytecodeLength = vsBlob->GetBufferSize();
 	pipelineDesc.PS.pShaderBytecode = psBlob->GetBufferPointer();
 	pipelineDesc.PS.BytecodeLength = psBlob->GetBufferSize();
-
-	//サンプルマスクの設定
+#pragma endregion
+#pragma region サンプルマスクの設定
+	//
 	pipelineDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;//標準設定
-	//pipelineDesc.SampleMask = UINT_MAX;
+														//pipelineDesc.SampleMask = UINT_MAX;
+#pragma endregion
 
-	//ラスタライザの設定
+#pragma region ラスタライザの設定					
+														//
 	pipelineDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;//カリングしない
 	pipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;//ポリゴン内塗りつぶし
 	pipelineDesc.RasterizerState.DepthClipEnable = true;//深度クリッピングを有効に
+#pragma endregion
 
-	////ブレンドステート
+#pragma region ブレンドステート
+	////
 	//pipelineDesc.BlendState.RenderTarget[0].RenderTargetWriteMask 
 	//	= D3D12_COLOR_WRITE_ENABLE_ALL;//RGB全てのチャネルを描画
 
-	//レンダ―ターゲットのブレンド設定
+#pragma endregion
+#pragma region レンダーターゲットのブレンド設定
+														//
 	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc = pipelineDesc.BlendState.RenderTarget[0];
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	//アルファ値共通設定
-	blenddesc.BlendEnable = true; // ブレンド有効にする
+#pragma endregion
+#pragma region アルファ値共通設定
+	//
+	blenddesc.BlendEnable = false; // ブレンド有効にする
 	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD; //ブレンドを有効にする
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE; //加算
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO; //デストの値を 0%使う　
- 
+#pragma endregion
+
+#pragma region 加算合成
+
 	//加算合成
 	//blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
 	//blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
 	//blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
+#pragma endregion
+#pragma region 今使ってない合成
+												 //減算合成
+												 //blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT; //減算
+												 //blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
+												 //blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
 
-	//減算合成
-	//blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT; //減算
-	//blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
-	//blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
+												 //色反転
+												 //blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
+												 //blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR; //1.0f-デストから－の値
+												 //blenddesc.DestBlend = D3D12_BLEND_ZERO; //使わない
+#pragma endregion
+#pragma region 半透明合成
+												 //
+	blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
+	blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値をアルファ値
+	blenddesc.DestBlend = D3D12_BLEND_ONE; //1.0f-ソースのアルファ値
+#pragma endregion
 
-	 //色反転
-	 //blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
-	 //blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR; //1.0f-デストから－の値
-	 //blenddesc.DestBlend = D3D12_BLEND_ZERO; //使わない
-
-	 //半透明合成
-	 blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
-	 blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値をアルファ値
-	 blenddesc.DestBlend = D3D12_BLEND_ONE; //1.0f-ソースのアルファ値
-
-	 //頂点レイアウトの設定
+#pragma region 頂点レイアウトの設定
+										   //
 	pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 	pipelineDesc.InputLayout.NumElements = _countof(inputLayout);
-
-	//図形の形状設定
+#pragma endregion
+#pragma region 図形の形状設定
+	//
 	pipelineDesc.PrimitiveTopologyType
 		= D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-	//その他の設定
+#pragma endregion
+#pragma region その他の設定
+	//
 	pipelineDesc.NumRenderTargets = 1;//描画対象は1つ
 	pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//0～255指定のRGBA
 	pipelineDesc.SampleDesc.Count = 1;//1ピクセルにつき1回サンプリング
-
-
-
-
+#pragma endregion
 
 	//ルートシグネチャ
 	ID3D12RootSignature* rootSignature;
@@ -592,12 +628,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//パイプラインステートの生成
 	ID3D12PipelineState* pipelineState = nullptr;
-	result = device->CreateGraphicsPipelineState(&pipelineDesc, 
+	result = device->CreateGraphicsPipelineState(&pipelineDesc,
 		IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
 
 	//定数バッファ用データ構造体(マテリアル)
-	struct ConstBufferDataMaterial 
+	struct ConstBufferDataMaterial
 	{
 		XMFLOAT4 color; //色(RGBA)
 	};
@@ -614,7 +650,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	cbResourceDesc.MipLevels = 1;
 	cbResourceDesc.SampleDesc.Count = 1;
 	cbResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	
+
 	ID3D12Resource* constBuffMaterial = nullptr;
 	//定数バッファの生成
 	result = device->CreateCommittedResource(
@@ -634,11 +670,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(result));
 
 	// 値を書き込むと自動的に転送される
-	constMapMaterial->color = XMFLOAT4(1, 0, 0, 0.5f); //RGBAで半透明の赤
+	constMapMaterial->color = XMFLOAT4(1, 1, 1, 0.0f); //RGBAで半透明の赤
 
-
-
-													   // インデックスデータ全体のサイズ
+  // インデックスデータ全体のサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * _countof(indices));
 
 	// リソース設定
@@ -677,34 +711,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	ibView.SizeInBytes = sizeIB;
 
+#pragma region 画像データ
 
-	////横方向ピクセル数
-	//const size_t textureWidth = 256;
-	////縦方向ピクセル数
-	//const size_t textureHeight = 256;
-	////配列の要素数
-	//const size_t imageDataCount = textureWidth * textureHeight;
-	////画像のイメージデータ配列
-	//XMFLOAT4* imageData = new XMFLOAT4[imageDataCount];//必ず後で開放する
-	//
-	////全ピクセルの色を初期化
-	//for (size_t i = 0; i < imageDataCount; i++)
-	//{
-	//	imageData[i].x = 1.0f; //R
-	//	imageData[i].y = 0.0f; //G
-	//	imageData[i].z = 0.0f; //B
-	//	imageData[i].w = 1.0f; //A
-	//}
+	//横方向ピクセル数
+	const size_t textureWidth = 256;
+	//縦方向ピクセル数
+	const size_t textureHeight = 256;
+	//配列の要素数
+	const size_t imageDataCount = textureWidth * textureHeight;
+	//画像のイメージデータ配列
+	XMFLOAT4* imageData = new XMFLOAT4[imageDataCount];//必ず後で開放する
+
+	//全ピクセルの色を初期化
+	for (size_t i = 0; i < imageDataCount; i++)
+	{
+		imageData[i].x = 0.0f; //R
+		imageData[i].y = 0.0f; //G
+		imageData[i].z = 0.0f; //B
+		imageData[i].w = 0.0f; //A
+	}
 
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
 	//WICテクスチャのロード
 	result = LoadFromWICFile(
-		L"Resources / texture.png",
+		L"Resources/texture.png",
 		WIC_FLAGS_NONE,
 		&metadata, scratchImg
 	);
+
+	assert(SUCCEEDED(result));
+#pragma endregion 
 
 	ScratchImage mipChine{};
 	//ミップマップ生成
@@ -749,21 +787,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		IID_PPV_ARGS(&texBuff)
 	);
 
+	assert(SUCCEEDED(result));
+
 	//全ミップマップについて
 	for (size_t i = 0; i < metadata.mipLevels; i++)
 	{
 		//ミップマップレベルを指定してイメージを取得
 		const Image* img = scratchImg.GetImage(i, 0, 0);
+
 		//テクスチャバッファにデータ転送
 		result = texBuff->WriteToSubresource(
 			(UINT)i,
 			nullptr,//全領域へコピー
 			img->pixels,//元データアドレス
-			(UINT)img->rowPitch,//1ラインサイズ
-			(UINT)img->slicePitch//一枚サイズ
+			(UINT)img-> rowPitch,//1ラインサイズ
+			(UINT)img->slicePitch//全サイズ
 		);
 		assert(SUCCEEDED(result));
 	}
+
+
+	////テクスチャバッファにデータ転送
+	//result = texBuff->WriteToSubresource(
+	//	0,
+	//	nullptr,//全領域へコピー
+	//	imageData,//元データアドレス
+	//	sizeof(XMFLOAT4) * textureWidth,//1ラインサイズ
+	//	sizeof(XMFLOAT4) * imageDataCount//全サイズ
+	//);
 
 	//元データ開放
 	delete[] imageData;
@@ -771,7 +822,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//SRVの最大個数
 	const size_t kMaxSRVCount = 2056;
-	
+
 	//デスクリプタヒープの設定
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -792,13 +843,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};//設定構造体
 	srvDesc.Format = resDesc.Format;//RGBA float
 	srvDesc.Shader4ComponentMapping =
-	D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 
 	//ハンドルの指す位置にシェーダーリソースビュー作成
 	device->CreateShaderResourceView(texBuff, &srvDesc, srvHandle);
-	
+
 	//OK//
 
 
@@ -836,7 +887,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
 
 		//3.画面クリア          R      G      B     A
-		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
+		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.5f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 
@@ -846,6 +897,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		BYTE key[256] = {};
 		keyboard->GetDeviceState(sizeof(key), key);
 
+#pragma region transform云々
 
 		//transform_.Trans_.x = 0.0f;
 		//transform_.Trans_.y = 0.0f;
@@ -918,11 +970,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//							 1.0f * affine[2][2];
 		//}
 
-
+#pragma endregion
 
 		//全頂点に対して
 		for (int i = 0; i < _countof(vertices); i++)
 		{
+			/*
+			vertices[i].uv.x += scroll;
+
+			if(vertices[i].uv.x > 8.0f)
+			{
+				vertices[i].uv.x = defo.x;
+			}
+			
+
+
+			float scroll = 0.001f;
+			float2 defo = input.uv;
+
+			input.uv.x += scroll;
+
+			if (input.uv.x > 8.0f)
+			{
+			input.uv.x = defo.x;
+			}
+
+			
+			*/
+
 			vertMap[i] = vertices[i];//座標をコピー
 		}
 
@@ -976,7 +1051,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//描画コマンド
 		//commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
 		//commandList->DrawInstanced(6, 1, 0, 0);//全ての頂点を使って描画
-		commandList->DrawIndexedInstanced(_countof(indices),1,0,0,0);//全ての頂点を使って描画
+		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);//全ての頂点を使って描画
 
 		//4.ここまで、描画コマンド
 
@@ -984,7 +1059,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 		commandList->ResourceBarrier(1, &barrierDesc);
-
 
 		//命令のクローズ
 		result = commandList->Close();
