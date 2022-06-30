@@ -274,10 +274,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vertex vertices[] =
 	{
 		//x		 y		z		u	  v
-		{{  0.0f, 100.0f, 0.0f}, {0.0f, 1.0f}},//左下
-		{{  0.0f,   0.0f, 0.0f}, {0.0f, 0.0f}},//左上
-		{{100.0f, 100.0f, 0.0f}, {1.0f, 1.0f}},//右下
-		{{100.0f,   0.0f, 0.0f}, {1.0f, 0.0f}},//右上
+		{{-50.0f, -50.0f, 50.0f}, {0.0f, 1.0f}},//左下
+		{{-50.0f,  50.0f, 50.0f}, {0.0f, 0.0f}},//左上
+		{{ 50.0f, -50.0f, 50.0f}, {1.0f, 1.0f}},//右下
+		{{ 50.0f,  50.0f, 50.0f}, {1.0f, 0.0f}},//右上
 	};
 
 	//Vertex vertices[] =
@@ -714,17 +714,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMMATRIX oldVer = XMMatrixIdentity();
 
 #pragma region 単位行列で埋めた後
+#pragma region 平行投影行列の計算
+
 		/*constMapTransform->mat.r[0].m128_f32[0] = 2.0f / window_width;
 		constMapTransform->mat.r[1].m128_f32[1] = -2.0f / window_height;
 		constMapTransform->mat.r[3].m128_f32[0] = -1.0f;
 		constMapTransform->mat.r[3].m128_f32[1] = 1.0f;*/
 
 		//DirectXMathで用意されている関数に置き換え
-		//平行投影行列の計算
 		 constMapTransform->mat = XMMatrixOrthographicOffCenterLH(
-			 0.0f, window_width,
-			  window_height, 0.0f,
-			 0.0f, 1.0f);
+			 0.0f, window_width,//左端、右端
+			  window_height, 0.0f,//下端、上端
+			 0.0f, 1.0f);//前端、奥端
+#pragma endregion
+#pragma region 投資投影変換行列の計算
+
+		 XMMATRIX matProjection =
+			 XMMatrixPerspectiveLH(
+			 XMConvertToRadians(45.0f),//上下画角45度
+			 (float)window_width / window_height,//アスペクト比(画面横幅/画面縦幅)
+			 0.1f, 1000.0f
+		 );//前端、奥端
+
+		 constMapTransform->mat = matProjection;
+#pragma endregion
 
 #pragma endregion
 
