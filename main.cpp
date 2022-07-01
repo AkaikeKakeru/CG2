@@ -252,7 +252,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//------DirectX初期化処理 ここまで------
 
 	//------描画初期化処理 ここから------
-	
+
+	float angle = 0.0f; //カメラの回転角
+	//postion
+	XMFLOAT3 position = { 0.0f,0.0f,0.0f };
+
 	//頂点データ構造体
 	struct Vertex
 	{
@@ -717,15 +721,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region ワールド変換行列
 		 XMMATRIX matWorld;
 		 matWorld = XMMatrixIdentity();
-
+//
 #pragma region スケーリング
 		 XMMATRIX matScale; //スケーリング行列
 		 matScale = XMMatrixScaling(1.0f, 0.5f, 1.0f);
 		 matWorld *= matScale; //ワールド行列にスケーリングを反映
 #pragma endregion
-
+//
 #pragma region ローテーション
-		 XMMATRIX matRot; //回転行列
+	 XMMATRIX matRot; //回転行列
 		 matRot = XMMatrixIdentity();
 		 matRot += XMMatrixRotationZ(XMConvertToRadians(0.0f));//Z軸周りに回転
 		 matRot += XMMatrixRotationX(XMConvertToRadians(15.0f));//Y軸周りに回転
@@ -735,7 +739,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region トランスレーション
 		 XMMATRIX matTrans; //平行移動行列
-		 matTrans = XMMatrixTranslation(-50.0f, 0, 0);
+		 matTrans = XMMatrixTranslation(0, 0, 0);
 		 matWorld *= matTrans; //ワールド行列に平行移動を反映
 #pragma endregion
 
@@ -912,7 +916,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//------描画初期化処理 ここまで------
 		
-	static float angle = 0.0f; //カメラの回転角
+
 
 	//ゲームループ
 	while (true) {
@@ -1018,10 +1022,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//}
 #pragma endregion
 
-#pragma ターゲットの周りを回るカメラ
-
-		
-
+#pragma region ターゲットの周りを回るカメラ
 		if(key[DIK_D] || key[DIK_A])
 		{
 			if(key[DIK_D]) { angle += XMConvertToRadians(1.0f);}
@@ -1035,6 +1036,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			constMapTransform->mat = matView * matProjection;
 		}
+#pragma endregion
+
+#pragma region 連続移動
+		if(key[DIK_UP] || key[DIK_DOWN] || key[DIK_RIGHT] || key[DIK_LEFT])
+		{
+			//座標を移動する処理
+			if (key[DIK_UP]) { position.z += 1.0f; }
+			else if (key[DIK_DOWN]) { position.z -= 1.0f; }
+
+			if (key[DIK_RIGHT]) { position.x += 1.0f; }
+			else if (key[DIK_LEFT]) { position.x -= 1.0f; }
+		}
+
+		constMapTransform->mat = XMMatrixIdentity();
+
+#pragma region スケーリング
+		matScale = XMMatrixIdentity();
+		matScale *= XMMatrixScaling(1.0f, 0.5f, 1.0f);
+		//matWorld *= matScale; //ワールド行列にスケーリングを反映
+#pragma endregion
+
+#pragma region ローテーション
+		matRot = XMMatrixIdentity();
+		matRot *= XMMatrixRotationZ(XMConvertToRadians(0.0f));//Z軸周りに回転
+		matRot += XMMatrixRotationX(XMConvertToRadians(15.0f));//Y軸周りに回転
+		matRot += XMMatrixRotationY(XMConvertToRadians(30.0f));//X軸周りに回転
+		//matWorld *= matRot; //ワールド行列に回転を反映
+#pragma endregion
+
+#pragma region トランスレーション
+		matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+		matWorld = matScale * matRot * matTrans; //ワールド行列に各種変換行列を反映
+#pragma endregion
+
+		constMapTransform->mat = matWorld *matView* matProjection;
+
 #pragma endregion
 
 		//全頂点に対して
