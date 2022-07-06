@@ -262,9 +262,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	XMFLOAT3 position;
 
 	//拡縮倍率
-	scale = { 1.0f,0.5f,1.0f };
+	scale = { 1.0f,1.0f,1.0f };
 	//回転角
-	rotation = { 15.0f,30.0f,0.0f };
+	rotation = { 0.0f,0.0f,0.0f };
 	//座標
 	position = { 0.0f,0.0f,0.0f };
 
@@ -330,16 +330,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	};
 
-
-	////インデックスデータ
-	//unsigned short indices[] =
-	//{
-	//	0,1,2,//一つ目
-	//	1,2,3,//二つ目
-	//	2,3,0,
-	//	3,0,1,
-	//};
-
 	//インデックスデータ
 	unsigned short indices[] =
 	{
@@ -349,20 +339,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//後ろ
 		4,5,6,//三つ目
 		5,6,7,//四つ目
-
+	
 		//左
-		5,0,7,//一つ目
-		0,7,2,//二つ目
+		8,9,10,//一つ目
+		9,10,11,//二つ目
 		//右
-		1,4,3,
-		4,3,6,
-
+		12,13,14,
+		13,14,15,
+		
 		//下
-		2,3,7,//一つ目
-		3,7,6,//二つ目
+		16,17,18,//一つ目
+		17,18,19,//二つ目
 		//上
-		1,0,4,
-		0,4,5,
+		20,21,22,
+		21,22,23,
 	};
 
 	//頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
@@ -770,7 +760,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//
 #pragma region スケーリング
 	XMMATRIX matScale; //スケーリング行列
-	matScale = XMMatrixScaling(1.0f, 0.5f, 1.0f);
+	matScale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	matWorld *= matScale; //ワールド行列にスケーリングを反映
 #pragma endregion
 //
@@ -778,8 +768,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	XMMATRIX matRot; //回転行列
 	matRot = XMMatrixIdentity();
 	matRot += XMMatrixRotationZ(XMConvertToRadians(0.0f));//Z軸周りに回転
-	matRot += XMMatrixRotationX(XMConvertToRadians(15.0f));//Y軸周りに回転
-	matRot += XMMatrixRotationY(XMConvertToRadians(30.0f));//X軸周りに回転
+	matRot += XMMatrixRotationX(XMConvertToRadians(0.0f));//Y軸周りに回転
+	matRot += XMMatrixRotationY(XMConvertToRadians(0.0f));//X軸周りに回転
 	matWorld *= matRot; //ワールド行列に回転を反映
 #pragma endregion
 
@@ -796,7 +786,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 値を書き込むと自動的に転送される
 	//constMapMaterial->color = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f); //RGBAで半透明の赤
-
+	//constMapTransform-> = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f); //RGBAで半透明の赤
 #pragma endregion
 
 	// インデックスデータ全体のサイズ
