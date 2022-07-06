@@ -199,6 +199,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//デスクリプタヒープの生成
 	device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap));
 
+#pragma region レンダ―ターゲットビュー
+
 	//バックバッファ
 	std::vector<ID3D12Resource*> backBuffers;
 	backBuffers.resize(swapChainDesc.BufferCount);
@@ -220,6 +222,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//レンダ―ターゲットビューの生成
 		device->CreateRenderTargetView(backBuffers[i], &rtvDesc, rtvHandle);
 	}
+#pragma endregion
+
+#pragma region 深度テスト
+	//リソース設定
+	D3D12_RESOURCE_DESC depthResouceDesc{};
+	depthResouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	depthResouceDesc.Width = window_width;
+	depthResouceDesc.Height = window_height;
+	depthResouceDesc.DepthOrArraySize = 1;
+	depthResouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthResouceDesc.SampleDesc.Count = 1;
+	depthResouceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+#pragma endregion
+
 
 	//フェンスの生成
 	ID3D12Fence* fence = nullptr;
