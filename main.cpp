@@ -270,6 +270,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap));
 #pragma endregion
 
+
+
 #pragma endregion
 
 
@@ -601,6 +603,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//図形の形状設定
 	pipelineDesc.PrimitiveTopologyType
 		= D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+
+#pragma region 深度テストの設定
+	//デプスステンシルステートの設定
+	pipelineDesc.DepthStencilState.DepthEnable = true;
+	pipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	pipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	pipelineDesc.DSVFormat = DXGI_FORMAT_R32_FLOAT;
+#pragma endregion
 
 	//その他の設定
 	pipelineDesc.NumRenderTargets = 1;//描画対象は1つ
@@ -1020,7 +1031,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//レンダ―ターゲットビューのハンドルを取得
 		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
 		rtvHandle.ptr += bbIndex * device->GetDescriptorHandleIncrementSize(rtvHeapDesc.Type);
-		commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+		
+		//レンダ―ターゲット設定コマンドに、深度ステンシルビュー用の記述を追加するため、旧コードをコメント化
+		//commandList->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+		
+		//深度ステンシルビュー用デスクリプタヒープのハンドルを取得
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+		commandList->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
 		//3.画面クリア          R      G      B     A
 		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
