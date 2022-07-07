@@ -328,7 +328,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//拡縮倍率
 	scale = { 1.0f,1.0f,1.0f };
 	//回転角
-	rotation = { 0.0f,0.0f,0.0f };
+	rotation = {20.0f,20.0f,20.0f };
 	//座標
 	position = { 0.0f,0.0f,0.0f };
 
@@ -361,10 +361,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{{ 5.0f,  5.0f, -5.0f}, {1.0f, 0.0f}},//右上
 
 		//後ろ
-		{{-5.0f, -5.0f,  5.0f}, {0.0f, 1.0f}},//左下
-		{{-5.0f,  5.0f,  5.0f}, {0.0f, 0.0f}},//左上
 		{{ 5.0f, -5.0f,  5.0f}, {1.0f, 1.0f}},//右下
 		{{ 5.0f,  5.0f,  5.0f}, {1.0f, 0.0f}},//右上
+		{{-5.0f, -5.0f,  5.0f}, {0.0f, 1.0f}},//左下
+		{{-5.0f,  5.0f,  5.0f}, {0.0f, 0.0f}},//左上
 
 		//左
 		{{-5.0f, -5.0f, -5.0f}, {0.0f, 1.0f}},//左下
@@ -373,10 +373,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{{-5.0f,  5.0f,  5.0f}, {1.0f, 0.0f}},//右上
 
 		//右
-		{{ 5.0f, -5.0f, -5.0f}, {0.0f, 1.0f}},//左下
-		{{ 5.0f, -5.0f,  5.0f}, {0.0f, 0.0f}},//左上
 		{{ 5.0f,  5.0f, -5.0f}, {1.0f, 1.0f}},//右下
 		{{ 5.0f,  5.0f,  5.0f}, {1.0f, 0.0f}},//右上
+		{{ 5.0f, -5.0f, -5.0f}, {0.0f, 1.0f}},//左下
+		{{ 5.0f, -5.0f,  5.0f}, {0.0f, 0.0f}},//左上
 
 
 		//下
@@ -387,10 +387,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		//上
-		{{-5.0f,  5.0f, -5.0f}, {0.0f, 1.0f}},//左下
-		{{ 5.0f,  5.0f, -5.0f}, {0.0f, 0.0f}},//左上
 		{{-5.0f,  5.0f,  5.0f}, {1.0f, 1.0f}},//右下
 		{{ 5.0f,  5.0f,  5.0f}, {1.0f, 0.0f}},//右上
+		{{-5.0f,  5.0f, -5.0f}, {0.0f, 1.0f}},//左下
+		{{ 5.0f,  5.0f, -5.0f}, {0.0f, 0.0f}},//左上
 
 	};
 
@@ -403,7 +403,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//後ろ
 		4,5,6,//三つ目
 		6,5,7,//四つ目
-	
+		
 		//左
 		8,9,10,//一つ目
 		10,9,11,//二つ目
@@ -417,6 +417,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//上
 		20,21,22,
 		22,21,23,
+	
 	};
 
 	//頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
@@ -833,20 +834,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	XMMATRIX matWorld;
 	matWorld = XMMatrixIdentity();
 	//
-#pragma region スケーリング
+//#pragma region スケーリング
 	XMMATRIX matScale; //スケーリング行列
-	matScale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	matWorld *= matScale; //ワールド行列にスケーリングを反映
-#pragma endregion
-//
-#pragma region ローテーション
+//	matScale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+//	matWorld *= matScale; //ワールド行列にスケーリングを反映
+//#pragma endregion
+////
+//#pragma region ローテーション
 	XMMATRIX matRot; //回転行列
 	matRot = XMMatrixIdentity();
-	matRot += XMMatrixRotationZ(XMConvertToRadians(0.0f));//Z軸周りに回転
-	matRot += XMMatrixRotationX(XMConvertToRadians(0.0f));//Y軸周りに回転
-	matRot += XMMatrixRotationY(XMConvertToRadians(0.0f));//X軸周りに回転
-	matWorld *= matRot; //ワールド行列に回転を反映
-#pragma endregion
+//	matRot += XMMatrixRotationZ(XMConvertToRadians(0.0f));//Z軸周りに回転
+//	matRot += XMMatrixRotationX(XMConvertToRadians(0.0f));//Y軸周りに回転
+//	matRot += XMMatrixRotationY(XMConvertToRadians(0.0f));//X軸周りに回転
+//	matWorld *= matRot; //ワールド行列に回転を反映
+//#pragma endregion
 
 #pragma region トランスレーション
 	XMMATRIX matTrans; //平行移動行列
@@ -856,7 +857,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma endregion
 
-	constMapTransform->mat = matWorld * matView * matProjection;
+	//constMapTransform->mat = matWorld * matView * matProjection;
 #pragma endregion
 
 	// 値を書き込むと自動的に転送される
@@ -1174,7 +1175,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region スケーリング
 		matScale = XMMatrixIdentity();
 		matScale *= XMMatrixScaling(scale.x, scale.y, scale.z);
-		//matWorld *= matScale; //ワールド行列にスケーリングを反映
+		matWorld *= matScale; //ワールド行列にスケーリングを反映
 #pragma endregion
 
 #pragma region ローテーション
@@ -1182,7 +1183,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));//Z軸周りに回転
 		matRot += XMMatrixRotationX(XMConvertToRadians(rotation.x));//X軸周りに回転
 		matRot += XMMatrixRotationY(XMConvertToRadians(rotation.y));//Y軸周りに回転
-		//matWorld *= matRot; //ワールド行列に回転を反映
+		matWorld *= matRot; //ワールド行列に回転を反映
 #pragma endregion
 
 #pragma region 変換行列を反映
