@@ -733,46 +733,51 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		XMMATRIX mat; //3D変換行列
 	};
 
+	ID3D12Resource* constBuffMaterial = nullptr;
 
 	ID3D12Resource* constBuffTransform = nullptr;
 	ConstBufferDataTransform* constMapTransform = nullptr;
-
-
-
 #pragma endregion
 
-	//#pragma region constMapMaterial関連
-	//	
-	//	//ヒープ設定
-	//	D3D12_HEAP_PROPERTIES cbHeapProp{};
-	//	cbHeapProp.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
-	//	//リソース設定
-	//	D3D12_RESOURCE_DESC cbResourceDesc{};
-	//	cbResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	//	cbResourceDesc.Width = (sizeof(ConstBufferDataMaterial ) + 0xff) & ~0xff; //256バイトアラインメント
-	//	cbResourceDesc.Height = 1;
-	//	cbResourceDesc.DepthOrArraySize = 1;
-	//	cbResourceDesc.MipLevels = 1;
-	//	cbResourceDesc.SampleDesc.Count = 1;
-	//	cbResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	//	
-	//	ID3D12Resource* constBuffMaterial = nullptr;
-	//	//定数バッファの生成
-	//	result = device->CreateCommittedResource(
-	//		&cbHeapProp, //ヒープ設定
-	//		D3D12_HEAP_FLAG_NONE,
-	//		&cbResourceDesc, //リソース設定
-	//		D3D12_RESOURCE_STATE_GENERIC_READ,
-	//		nullptr,
-	//		IID_PPV_ARGS(&constBuffMaterial));
-	//	assert(SUCCEEDED(result));
-	//
-	//	//定数バッファのマッピング
-	//	ConstBufferDataMaterial* constMapMaterial = nullptr;
-	//	result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial); //マッピング
-	//	assert(SUCCEEDED(result));
-	//	
-	//#pragma endregion
+#pragma region constMapMaterial関連
+		
+		//ヒープ設定
+		D3D12_HEAP_PROPERTIES cbheapprop{};
+		cbheapprop.Type = D3D12_HEAP_TYPE_UPLOAD; // GPUへの転送用
+		//リソース設定
+		D3D12_RESOURCE_DESC cbresdesc{};
+		cbresdesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		cbresdesc.Width = (sizeof(ConstBufferDataMaterial ) + 0xff) & ~0xff; //256バイトアラインメント
+		cbresdesc.Height = 1;
+		cbresdesc.DepthOrArraySize = 1;
+		cbresdesc.MipLevels = 1;
+		cbresdesc.SampleDesc.Count = 1;
+		cbresdesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		
+		//ID3D12Resource* constBuffMaterial = nullptr;
+		//定数バッファの生成
+		result = device->CreateCommittedResource(
+			&cbheapprop, //ヒープ設定
+			D3D12_HEAP_FLAG_NONE,
+			&cbresdesc, //リソース設定
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&constBuffMaterial));
+		assert(SUCCEEDED(result));
+	
+		//定数バッファのマッピング
+		ConstBufferDataMaterial* constMapMaterial = nullptr;
+		result = constBuffMaterial->Map(0, nullptr, (void**)&constMapMaterial); //マッピング
+
+		// 値を書き込むと自動的に転送される
+		constMapMaterial->color = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f); //RGBAで半透明の赤
+		
+		//マッピング解除
+		constBuffMaterial->Unmap(0, nullptr);
+
+		assert(SUCCEEDED(result));
+		
+	#pragma endregion
 
 #pragma region constMapTransfrom関連
 
@@ -807,6 +812,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//単位行列を代入
 	constMapTransform->mat = XMMatrixIdentity();
+#pragma endregion
 
 #pragma region 単位行列で埋めた後
 #pragma region 平行投影行列の計算
@@ -866,10 +872,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 	//constMapTransform->mat = matWorld * matView * matProjection;
-#pragma endregion
 
-	// 値を書き込むと自動的に転送される
-	//constMapMaterial->color = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f); //RGBAで半透明の赤
+
 	//constMapTransform-> = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f); //RGBAで半透明の赤
 #pragma endregion
 
@@ -1280,7 +1284,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->IASetVertexBuffers(0, 1, &vbView);
 
 		//定数バッファビュー(CBV)の設定コマンド
-		//commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
+		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
 
 		//SRVヒープの設定コマンド
 		commandList->SetDescriptorHeaps(1, &srvHeap);

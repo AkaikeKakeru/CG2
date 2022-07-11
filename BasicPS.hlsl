@@ -15,11 +15,15 @@ float4 main(VSOutput input) : SV_TARGET
 	//アンビエント項を0.3として計算
 	float brightness = diffuse + 0.3f;
 
+	//テクスチャの色
+	float4 texColor = float4(tex.Sample(smp, input.uv));
+
 
 	//輝度をRGBに代入して出力
-	return float4(brightness,brightness,brightness,1);
+	//テクスチャの色と合成する
+	return float4(texColor.rgb * brightness,texColor.a) * color;
 
 
 	//RGBをそれぞれの法線のXYZ、Aを1で出力
-	//return float4(input.normal,1);
+	//float4(input.normal,1);
 }
