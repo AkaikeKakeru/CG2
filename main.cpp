@@ -324,6 +324,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	XMFLOAT3 rotation;
 	//座標
 	XMFLOAT3 position;
+	//座標
+	XMFLOAT3 position1;
 
 	//拡縮倍率
 	scale = { 1.0f,1.0f,1.0f };
@@ -331,6 +333,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rotation = {20.0f,20.0f,20.0f };
 	//座標
 	position = { 0.0f,0.0f,0.0f };
+	position1 = { -20.0f,0.0f,0.0f };
 
 
 	//頂点データ構造体
@@ -1200,7 +1203,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 #pragma endregion
 
-#pragma region 連続移動
+#pragma region 連続移動ゼロ番目
 
 #pragma region	トランスレーション
 
@@ -1243,6 +1246,53 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//定数バッファに転送
 		constMapTransform0->mat = matWorld * matView * matProjection;
+
+#pragma endregion
+
+#pragma region 連続移動イチ番目
+
+#pragma region	トランスレーション
+
+		if (key[DIK_I] || key[DIK_K] || key[DIK_L] || key[DIK_J])
+		{
+			//座標を移動する処理
+			if (key[DIK_I]) { position1.z += 1.0f; }
+			else if (key[DIK_K]) { position1.z -= 1.0f; }
+
+			if (key[DIK_J]) { position1.x += 1.0f; }
+			else if (key[DIK_L]) { position1.x -= 1.0f; }
+		}
+
+		matTrans1 = XMMatrixTranslation(position1.x, position1.y, position1.z);
+#pragma endregion
+
+#pragma region スケーリング
+		matScale1 = XMMatrixIdentity();
+		matScale1 *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+		matWorld1 *= matScale1; //ワールド行列にスケーリングを反映
+#pragma endregion
+
+#pragma region ローテーション
+		matRot1 = XMMatrixIdentity();
+		//matRot1 *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));//Z軸周りに回転
+		//matRot1 += XMMatrixRotationX(XMConvertToRadians(rotation.x));//X軸周りに回転
+		matRot1 *= XMMatrixRotationY(XMConvertToRadians(rotation.y));//Y軸周りに回転
+		matWorld1 *= matRot1; //ワールド行列に回転を反映
+#pragma endregion
+
+#pragma region 変換行列を反映
+							//単位化
+		constMapTransform1->mat = XMMatrixIdentity();
+		matWorld1 = XMMatrixIdentity();
+		//ワールド行列に各種変換行列を反映
+		matWorld1 *= matScale1;
+		matWorld1 *= matRot1;
+		matWorld1 *= matTrans1;
+#pragma endregion
+
+
+		//定数バッファに転送
+		constMapTransform1->mat = matWorld1 * matView * matProjection;
 
 #pragma endregion
 
@@ -1328,16 +1378,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
 		//SRVヒープの先頭にあるSRVをルートパラメータ1番に設定
 		commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
-		//定数バッファビュー(CBV)の設定コマンド
-		commandList->SetGraphicsRootConstantBufferView(2, constBuffTransform0->GetGPUVirtualAddress());
-
-
 		//インデックスバッファビューの設定コマンド
 		commandList->IASetIndexBuffer(&ibView);
 
+	//0番定数バッファ
+		//定数バッファビュー(CBV)の設定コマンド
+		commandList->SetGraphicsRootConstantBufferView(2, constBuffTransform0->GetGPUVirtualAddress());
 		//描画コマンド
-		//commandList->DrawInstanced(_countof(vertices), 1, 0, 0);//全ての頂点を使って描画
-		//commandList->DrawInstanced(6, 1, 0, 0);//全ての頂点を使って描画
+		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);//全ての頂点を使って描画
+
+
+	 //1番定数バッファ
+		//定数バッファビュー(CBV)の設定コマンド
+		commandList->SetGraphicsRootConstantBufferView(2, constBuffTransform1->GetGPUVirtualAddress());
+		//描画コマンド
 		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);//全ての頂点を使って描画
 
 		//4.ここまで、描画コマンド
