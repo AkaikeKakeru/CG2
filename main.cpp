@@ -875,6 +875,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	window_height, 0.0f,//下端、上端
 	//	0.0f, 1.0f);//前端、奥端
 #pragma endregion
+
+	//3Dオブジェクトの数
+	const size_t kObjectCount = 50;
+	//3Dオブジェクトの配列
+	Object3d object3ds[kObjectCount];
+
 #pragma region 投資投影変換行列の計算
 
 	XMMATRIX matProjection =
