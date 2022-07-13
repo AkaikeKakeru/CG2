@@ -43,7 +43,7 @@ struct ConstBufferDataTransform {
 };
 
 //3Dオブジェクト型
-struct Object3d
+typedef struct Object3d
 {
 	//定数バッファ(行列用)
 	ID3D12Resource* constBuffTransform;
@@ -61,8 +61,9 @@ struct Object3d
 
 	//親オブジェクトへのポインタ
 	Object3d* parent = nullptr;
-};
+}Object3d;
 
+//3Dオブジェクトの初期化
 void InitializeObject3d(Object3d* object, ID3D12Device* device)
 {
 	HRESULT result;
@@ -99,6 +100,61 @@ void InitializeObject3d(Object3d* object, ID3D12Device* device)
 		assert(SUCCEEDED(result));
 
 #pragma endregion
+}
+
+//3Dオブジェクトの初期化処理の呼び出し
+void SetIntializeObject3ds(Object3d* object3ds, ID3D12Device* device)
+{
+//	//配列内の全オブジェクトに対して
+//	for (int i = 0; i < _countof(object3ds); i++)
+//	{
+//		//初期化
+//		InitializeObject3d(object3ds[i], device);
+//
+//		//ここから↓は親子構造のサンプル
+//		//先頭以外なら
+//		if (i > 0) {
+//			//1つ前のオブジェクトを親オブジェクトとする
+//			//object3ds[i].parent = &object3ds[i - 1];
+//			//親オブジェクトの9割の大きさ
+//			object3ds[i]->scale = { 0.9f,0.9f,0.9f };
+//			//親オブジェクトに対してZ軸まわりに30度回転
+//			object3ds[i]->rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f)};
+//			//親オブジェクトに対してZ方向に-8.0ずらす
+//			object3ds[i]->position = { 0.0f,0.0f,-8.0f };
+//		}
+//	}
+}
+
+//オブジェクト更新処理
+void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection) 
+{
+	XMMATRIX matScale, matRot, matTrans;
+
+	//スケール、回転、平行移動行列の計算
+	matScale = XMMatrixScaling(object->scale.x, object->scale.y, object->scale.z);
+	matRot = XMMatrixIdentity();
+	matRot *= XMMatrixRotationZ(object->rotation.z);
+	matRot *= XMMatrixRotationX(object->rotation.x);
+	matRot *= XMMatrixRotationY(object->rotation.y);
+	matTrans = XMMatrixTranslation(
+		object->position.x, object->position.y, object->position.z);
+
+	//ワールド行列の合成
+	object->matWorld = XMMatrixIdentity();	//変形リセット
+	object->matWorld *= matScale;	//ワールド行列のスケーリングを反映
+	object->matWorld *= matRot;	//ワールド行列に回転を反映
+	object->matWorld *= matTrans;	//ワールド行列に平行移動を反映
+
+	//親オブジェクトがあれば
+	if(object->parent != nullptr){
+		//親オブジェクトのワールド行列を掛ける
+		object->matWorld *= object->parent->matWorld;
+	}
+
+	//定数バッファへデータ転送
+	object->constMapTransform->mat = object->matWorld * matView * matProjection;
+
 }
 
 //ウィンドウプロシージャ
@@ -865,6 +921,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	cbResourceDesc.SampleDesc.Count = 1;
 	cbResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
+
+#pragma region 三次元オブジェクトの構造化
+
+	//3Dオブジェクトの数
+	const size_t kObjectCount = 50;
+	//3Dオブジェクトの配列
+	Object3d object3ds[kObjectCount];
+
+
+	//SetIntializeObject3ds(object3ds, device);
+
+	//配列内の全オブジェクトに対して
+	for (int i = 0; i < _countof(object3ds); i++)
+	{
+		//初期化
+		InitializeObject3d(&object3ds[i], device);
+
+		//ここから↓は親子構造のサンプル
+		//先頭以外なら
+		if (i > 0) {
+			//1つ前のオブジェクトを親オブジェクトとする
+			//object3ds[i].parent = &object3ds[i - 1];
+			//親オブジェクトの9割の大きさ
+			object3ds[i].scale = { 0.9f,0.9f,0.9f };
+			//親オブジェクトに対してZ軸まわりに30度回転
+			object3ds[i].rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f)};
+			//親オブジェクトに対してZ方向に-8.0ずらす
+			object3ds[i].position = { 0.0f,0.0f,-8.0f };
+		}
+	}
+
+#pragma endregion
+
 #pragma region 0番
 //	//定数バッファの生成
 //	result = device->CreateCommittedResource(
@@ -914,10 +1003,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	0.0f, 1.0f);//前端、奥端
 #pragma endregion
 
-	//3Dオブジェクトの数
-	const size_t kObjectCount = 50;
-	//3Dオブジェクトの配列
-	Object3d object3ds[kObjectCount];
+	
 
 #pragma region 投資投影変換行列の計算
 
