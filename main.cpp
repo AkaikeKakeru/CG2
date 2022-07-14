@@ -473,7 +473,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//拡縮倍率
 	scale = { 1.0f,1.0f,1.0f };
 	//回転角
-	rotation = {20.0f,20.0f,20.0f };
+	rotation = {00.0f,00.0f,00.0f };
 	//座標
 	position = { 0.0f,0.0f,0.0f };
 	//position1 = { -20.0f,0.0f,0.0f };
@@ -871,13 +871,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12Resource* constBuffMaterial = nullptr;
 
 #pragma region 0番定数バッファ
-	ID3D12Resource* constBuffTransform0 = nullptr;
-	ConstBufferDataTransform* constMapTransform0 = nullptr;
+	//ID3D12Resource* constBuffTransform0 = nullptr;
+	//ConstBufferDataTransform* constMapTransform0 = nullptr;
 #pragma endregion
 
 #pragma region 1番定数バッファ
-	ID3D12Resource* constBuffTransform1 = nullptr;
-	ConstBufferDataTransform* constMapTransform1 = nullptr;
+	/*ID3D12Resource* constBuffTransform1 = nullptr;
+	ConstBufferDataTransform* constMapTransform1 = nullptr;*/
 #pragma endregion
 
 #pragma endregion
@@ -958,7 +958,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//先頭以外なら
 		if (i > 0) {
 			//1つ前のオブジェクトを親オブジェクトとする
-			//object3ds[i].parent = &object3ds[i - 1];
+			object3ds[i].parent = &object3ds[i - 1];
 			//親オブジェクトの9割の大きさ
 			object3ds[i].scale = { 0.9f,0.9f,0.9f };
 			//親オブジェクトに対してZ軸まわりに30度回転
@@ -1282,93 +1282,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		BYTE key[256] = {};
 		keyboard->GetDeviceState(sizeof(key), key);
 
-#pragma region transform関連
-
-		//transform_.Trans_.x = 0.0f;
-		//transform_.Trans_.y = 0.0f;
-
-		//transform_.Rota = 0.0f;
-
-		//transform_.Scale = 1.0f;
-
-
-		//if(key[DIK_D])
-		//{
-		//	transform_.Trans_.x += 0.05f;
-		//}
-		//if(key[DIK_A])
-		//{
-		//	transform_.Trans_.x -= 0.05f;
-		//}
-
-		//if(key[DIK_W])
-		//{
-		//	transform_.Trans_.y += 0.05f;
-		//}
-		//if(key[DIK_S])
-		//{
-		//	transform_.Trans_.y -= 0.05f;
-		//}
-
-		//if(key[DIK_Q])
-		//{
-		//	transform_.Rota -= PI / 32;
-		//}
-		//if(key[DIK_E])
-		//{
-		//	transform_.Rota += PI / 32;
-		//}
-
-		//if(key[DIK_Z])
-		//{
-		//	transform_.Scale -= 0.1f;
-		//}
-		//if(key[DIK_C])
-		//{
-		//	transform_.Scale += 0.1f;
-		//}
-
-		//	affine[0][0] = transform_.Scale * cos(transform_.Rota);
-		//	affine[0][1] = transform_.Scale * ( - sin(transform_.Rota));
-		//	affine[0][2] = transform_.Trans_.x;
-
-		//	affine[1][0] = transform_.Scale * sin(transform_.Rota);
-		//	affine[1][1] = transform_.Scale * cos(transform_.Rota);
-		//	affine[1][2] = transform_.Trans_.y;
-
-		//	affine[2][0] = 0.0f;
-		//	affine[2][1] = 0.0f;
-		//	affine[2][2] = 1.0f;
-
-		//for (int i = 0; i < _countof(vertices); i++)
-		//{
-		//	vertices[i].x = vertices[i].x * affine[0][0] +
-		//					vertices[i].y * affine[0][1] +
-		//							 1.0f * affine[0][2];
-
-		//	vertices[i].y = vertices[i].x * affine[1][0] +
-		//					vertices[i].y * affine[1][1] +
-		//							 1.0f * affine[1][2];
-
-		//	vertices[i].z = vertices[i].x * affine[2][0] +
-		//					vertices[i].y * affine[2][1] +
-		//							 1.0f * affine[2][2];
-		//}
-#pragma endregion
-
 #pragma region ターゲットの周りを回るカメラ
 		if (key[DIK_D] || key[DIK_A])
 		{
-			if (key[DIK_D]) { angle += XMConvertToRadians(1.0f); }
-			else if (key[DIK_A]) { angle -= XMConvertToRadians(1.0f); }
+			//if (key[DIK_D]) { angle += XMConvertToRadians(1.0f); }
+			//else if (key[DIK_A]) { angle -= XMConvertToRadians(1.0f); }
 
-			//angleラジアンだけY軸周りに回転、半径は-100
-			eye.x = -100 * sinf(angle);
-			eye.z = -100 * cosf(angle);
-			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
-				XMLoadFloat3(&target), XMLoadFloat3(&up));
+			////angleラジアンだけY軸周りに回転、半径は-100
+			//eye.x = -100 * sinf(angle);
+			//eye.z = -100 * cosf(angle);
+			//matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
+			//	XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-			constMapTransform0->mat = matView * matProjection;
+			//constMapTransform0->mat = matView * matProjection;
 		}
 #pragma endregion
 
@@ -1557,6 +1483,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//インデックスバッファビューの設定コマンド
 		commandList->IASetIndexBuffer(&ibView);
 
+
+		//全オブジェクトについて処理
+		for (int i = 0; i < _countof(object3ds); i++)
+		{
+			DrawObject3d(&object3ds[i], commandList, vbView, ibView, _countof(indices));
+		}
+		 
+		
 	//0番定数バッファ
 		////定数バッファビュー(CBV)の設定コマンド
 		//commandList->SetGraphicsRootConstantBufferView(2, constBuffTransform0->GetGPUVirtualAddress());
