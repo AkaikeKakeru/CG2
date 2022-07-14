@@ -173,8 +173,23 @@ void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D1
 }
 
 //座標操作
-void UpdateObjectPosition(char key){
-	if (key[]) {};
+void UpdateObjectPosition(Object3d* object, BYTE* key){
+	if (key[DIK_UP]) { object->position.y += 1.0f; }
+	else if (key[DIK_DOWN]) { object->position.y -= 1.0f; }
+	if (key[DIK_RIGHT]) { object->position.x += 1.0f; }
+	else if (key[DIK_LEFT]) { object->position.x -= 1.0f; }
+}
+
+//回転操作
+void UpdateObjectRotation(Object3d* object, BYTE* key){
+	if (key[DIK_Q]) { object->rotation.z += 0.1f; }
+	else if (key[DIK_E]) { object->rotation.z -= 0.1f; }
+}
+
+//オブジェクト操作
+void UpdateObjectControll(Object3d* object, BYTE* key){
+	UpdateObjectRotation(object, key);
+	UpdateObjectPosition(object, key);
 }
 
 //ウィンドウプロシージャ
@@ -1310,25 +1325,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			UpdateObject3d(&object3ds[i], matView, matProjection);
 		
 		}
-			if (key[DIK_UP] || key[DIK_DOWN] || key[DIK_RIGHT] || key[DIK_LEFT])
-			{
-				//座標を移動する処理
-				if (key[DIK_UP]) { object3ds[0].position.y += 1.0f; }
-				else if (key[DIK_DOWN]) { object3ds[0].position.y -= 1.0f; }
 
-				if (key[DIK_RIGHT]) { object3ds[0].position.x += 1.0f; }
-				else if (key[DIK_LEFT]) { object3ds[0].position.x -= 1.0f; }
-			
-				
-			}
+		UpdateObjectControll(&object3ds[0], key);
+		/*UpdateObjectRotation(&object3ds[0], key);
+		UpdateObjectPosition(&object3ds[0], key);*/
 
-			if (key[DIK_Q] || key[DIK_E])
-			{
-				//座標を移動する処理
-				if (key[DIK_Q]) { object3ds[0].rotation.z += 0.1f; }
-				else if (key[DIK_E]) { object3ds[0].rotation.z -= 0.1f; }
-				
-			}
+			//if (key[DIK_UP] || key[DIK_DOWN] || key[DIK_RIGHT] || key[DIK_LEFT])
+			//{
+			//	//座標を移動する処理
+			//	if (key[DIK_UP]) { object3ds[0].position.y += 1.0f; }
+			//	else if (key[DIK_DOWN]) { object3ds[0].position.y -= 1.0f; }
+
+			//	if (key[DIK_RIGHT]) { object3ds[0].position.x += 1.0f; }
+			//	else if (key[DIK_LEFT]) { object3ds[0].position.x -= 1.0f; }
+			//
+			//	
+			//}
+
+			//if (key[DIK_Q] || key[DIK_E])
+			//{
+			//	//座標を移動する処理
+			//	if (key[DIK_Q]) { object3ds[0].rotation.z += 0.1f; }
+			//	else if (key[DIK_E]) { object3ds[0].rotation.z -= 0.1f; }
+			//	
+			//}
 
 
 #pragma region	トランスレーション
