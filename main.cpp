@@ -103,29 +103,24 @@ void InitializeObject3d(Object3d* object, ID3D12Device* device)
 }
 
 //3Dオブジェクトの初期化処理の呼び出し
-void SetIntializeObject3ds(Object3d* object3ds[],const size_t kObjectCount, ID3D12Device* device)
+void SetIntializeObject3ds(Object3d* object, ID3D12Device* device, int objectNum)
 {
-//	Object3d object[kObjectCount];
-//
-//	//配列内の全オブジェクトに対して
-//	for (int i = 0; i < _countof(object3ds); i++)
-//	{
-//		//初期化
-//		InitializeObject3d(object3ds[i], device);
-//
-//		//ここから↓は親子構造のサンプル
-//		//先頭以外なら
-//		if (i > 0) {
-//			//1つ前のオブジェクトを親オブジェクトとする
-//			//object3ds[i].parent = &object3ds[i - 1];
-//			//親オブジェクトの9割の大きさ
-//			object3ds[i]->scale = { 0.9f,0.9f,0.9f };
-//			//親オブジェクトに対してZ軸まわりに30度回転
-//			object3ds[i]->rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f)};
-//			//親オブジェクトに対してZ方向に-8.0ずらす
-//			object3ds[i]->position = { 0.0f,0.0f,-8.0f };
-//		}
-//	}
+		//初期化
+		InitializeObject3d(object, device);
+
+		//ここから↓は親子構造のサンプル
+		//先頭以外なら
+		if (objectNum > 0  ) {
+			//1つ前のオブジェクトを親オブジェクトとする
+			object->parent = &object[objectNum - 1];
+			//親オブジェクトの9割の大きさ
+			object->scale = { 0.9f,0.9f,0.9f };
+			//親オブジェクトに対してZ軸まわりに30度回転
+			object->rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f)};
+			//親オブジェクトに対してZ方向に-8.0ずらす
+			object->position = { 0.0f,0.0f,-8.0f };
+		}
+
 }
 
 //オブジェクト更新処理
@@ -958,7 +953,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//配列内の全オブジェクトに対して
 	for (int i = 0; i < _countof(object3ds); i++)
 	{
-		//SetIntializeObject3ds(object3ds, device);
+		//SetIntializeObject3ds(&object3ds[i], device, i);
 
 		//初期化
 		InitializeObject3d(&object3ds[i], device);
@@ -975,6 +970,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//親オブジェクトに対してZ方向に-8.0ずらす
 			object3ds[i].position = { 0.0f,0.0f,-8.0f };
 		}
+
 	}
 
 #pragma endregion
@@ -1069,7 +1065,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ibView.Format = DXGI_FORMAT_R16_UINT;
 	ibView.SizeInBytes = sizeIB;
 
-
+	//1枚目のテクスチャ
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
@@ -1077,8 +1073,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	result = LoadFromWICFile(
 		L"Resources/texture.png",
 		WIC_FLAGS_NONE,
-		&metadata, scratchImg
-	);
+		&metadata, scratchImg);
+
+	//2枚目のテクスチャ
+	TexMetadata metadata2{};
+	ScratchImage scratchImg2{};
+
+	//WICテクスチャのロード
+	result = LoadFromWICFile(
+		L"Resources/reimu.png",
+		WIC_FLAGS_NONE,
+		&metadata2, scratchImg2);
 
 	ScratchImage mipChine{};
 	//ミップマップ生成
@@ -1112,6 +1117,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	textureResourceDesc.SampleDesc.Count = 1;
 
 
+	//リソース設定
+	D3D12_RESOURCE_DESC textureResourceDesc2{};
+	textureResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	textureResourceDesc.Format = metadata.format;
+	textureResourceDesc.Width = metadata.width; //幅
+	textureResourceDesc.Height = (UINT)metadata.height; //高さ
+	textureResourceDesc.DepthOrArraySize = (UINT16)metadata.arraySize;
+	textureResourceDesc.MipLevels = (UINT16)metadata.mipLevels;
+	textureResourceDesc.SampleDesc.Count = 1;
+
+
 	//テクスチャバッファの生成
 	ID3D12Resource* texBuff = nullptr;
 	result = device->CreateCommittedResource(
@@ -1120,8 +1136,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		&textureResourceDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&texBuff)
-	);
+		IID_PPV_ARGS(&texBuff));
+
+	//2個目テクスチャバッファの生成
+	ID3D12Resource* texBuff2 = nullptr;
+	result = device->CreateCommittedResource(
+		&textureHeapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&textureResourceDesc2,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&texBuff2));
 
 	//全ミップマップについて
 	for (size_t i = 0; i < metadata.mipLevels; i++)
@@ -1173,6 +1198,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ハンドルの指す位置にシェーダーリソースビュー作成
 	device->CreateShaderResourceView(texBuff, &srvDesc, srvHandle);
 
+#pragma region テクスチャの差し替えで追記
+	//サイズ変更
+	UINT incrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	srvHandle.ptr += incrementSize;
+
+	//2枚目用
+	//シェーダリソースビュー設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};//設定構造体
+	srvDesc2.Format = textureResourceDesc2.Format;//RGBA float
+	srvDesc2.Shader4ComponentMapping =
+		D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
+	srvDesc2.Texture2D.MipLevels = textureResourceDesc2.MipLevels;
+
+	//ハンドルの指す位置にシェーダーリソースビュー作成
+	device->CreateShaderResourceView(texBuff2, &srvDesc2, srvHandle);
+
+#pragma endregion
 	//OK//
 
 
