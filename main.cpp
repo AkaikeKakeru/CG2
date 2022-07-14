@@ -172,6 +172,11 @@ void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D1
 	commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
 }
 
+//座標操作
+void UpdateObjectPosition(char key){
+	if (key[]) {};
+}
+
 //ウィンドウプロシージャ
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	switch (msg) {
@@ -1044,18 +1049,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region ワールド変換行列
 #pragma region 0番
-//	XMMATRIX matWorld;
-//	matWorld = XMMatrixIdentity();
-//
-//	XMMATRIX matScale; //スケーリング行列
-//
-//	XMMATRIX matRot; //回転行列
-//	matRot = XMMatrixIdentity();
-//
-//	XMMATRIX matTrans; //平行移動行列
-//	matTrans = XMMatrixTranslation(0, 0, 0);
-//
-//	matWorld *= matTrans; //ワールド行列に平行移動を反映
+	XMMATRIX matWorld;
+	matWorld = XMMatrixIdentity();
+
+	XMMATRIX matScale; //スケーリング行列
+
+	XMMATRIX matRot; //回転行列
+	matRot = XMMatrixIdentity();
+
+	XMMATRIX matTrans; //平行移動行列
+	matTrans = XMMatrixTranslation(0, 0, 0);
+
+	matWorld *= matTrans; //ワールド行列に平行移動を反映
 #pragma endregion
 
 #pragma region 1番
@@ -1285,16 +1290,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region ターゲットの周りを回るカメラ
 		if (key[DIK_D] || key[DIK_A])
 		{
-			//if (key[DIK_D]) { angle += XMConvertToRadians(1.0f); }
-			//else if (key[DIK_A]) { angle -= XMConvertToRadians(1.0f); }
+			if (key[DIK_D]) { angle += XMConvertToRadians(1.0f); }
+			else if (key[DIK_A]) { angle -= XMConvertToRadians(1.0f); }
 
-			////angleラジアンだけY軸周りに回転、半径は-100
-			//eye.x = -100 * sinf(angle);
-			//eye.z = -100 * cosf(angle);
-			//matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
-			//	XMLoadFloat3(&target), XMLoadFloat3(&up));
+			//angleラジアンだけY軸周りに回転、半径は-100
+			eye.x = -100 * sinf(angle);
+			eye.z = -100 * cosf(angle);
+			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
+				XMLoadFloat3(&target), XMLoadFloat3(&up));
 
-			//constMapTransform0->mat = matView * matProjection;
+			object3ds[0].constMapTransform->mat = matView * matProjection;
 		}
 #pragma endregion
 
@@ -1303,7 +1308,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		for (size_t i = 0; i < _countof(object3ds); i++)
 		{
 			UpdateObject3d(&object3ds[i], matView, matProjection);
+		
 		}
+			if (key[DIK_UP] || key[DIK_DOWN] || key[DIK_RIGHT] || key[DIK_LEFT])
+			{
+				//座標を移動する処理
+				if (key[DIK_UP]) { object3ds[0].position.y += 1.0f; }
+				else if (key[DIK_DOWN]) { object3ds[0].position.y -= 1.0f; }
+
+				if (key[DIK_RIGHT]) { object3ds[0].position.x += 1.0f; }
+				else if (key[DIK_LEFT]) { object3ds[0].position.x -= 1.0f; }
+			
+				
+			}
+
+			if (key[DIK_Q] || key[DIK_E])
+			{
+				//座標を移動する処理
+				if (key[DIK_Q]) { object3ds[0].rotation.z += 0.1f; }
+				else if (key[DIK_E]) { object3ds[0].rotation.z -= 0.1f; }
+				
+			}
 
 
 #pragma region	トランスレーション
