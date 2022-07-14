@@ -101,10 +101,12 @@ void InitializeObject3d(Object3d* object, ID3D12Device* device)
 
 #pragma endregion
 }
-
-//3Dオブジェクトの初期化処理の呼び出し
-void SetIntializeObject3ds(Object3d* object3ds, ID3D12Device* device)
-{
+//
+////3Dオブジェクトの初期化処理の呼び出し
+//void SetIntializeObject3ds(Object3d* object3ds[],const size_t kObjectCount, ID3D12Device* device)
+//{
+//	Object3d object[kObjectCount];
+//
 //	//配列内の全オブジェクトに対して
 //	for (int i = 0; i < _countof(object3ds); i++)
 //	{
@@ -124,7 +126,7 @@ void SetIntializeObject3ds(Object3d* object3ds, ID3D12Device* device)
 //			object3ds[i]->position = { 0.0f,0.0f,-8.0f };
 //		}
 //	}
-}
+//}
 
 //オブジェクト更新処理
 void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection) 
@@ -930,11 +932,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Object3d object3ds[kObjectCount];
 
 
-	//SetIntializeObject3ds(object3ds, device);
 
 	//配列内の全オブジェクトに対して
 	for (int i = 0; i < _countof(object3ds); i++)
 	{
+		//SetIntializeObject3ds(object3ds, device);
+
 		//初期化
 		InitializeObject3d(&object3ds[i], device);
 
@@ -1060,7 +1063,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma endregion
 //
-//	constMapTransform0->mat = matWorld * matView * matProjection;
+	//constMapTransform0->mat = matWorld * matView * matProjection;
 //	constMapTransform1->mat = matWorld * matView * matProjection;
 
 	//constMapTransform-> = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.5f); //RGBAで半透明の赤
@@ -1356,7 +1359,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 #pragma endregion
 
-#pragma region 連続移動ゼロ番目
+#pragma region 連続移動
+
+		for (size_t i = 0; i < _countof(object3ds); i++)
+		{
+			UpdateObject3d(&object3ds[i], matView, matProjection);
+		}
+
 
 #pragma region	トランスレーション
 
