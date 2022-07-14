@@ -101,10 +101,10 @@ void InitializeObject3d(Object3d* object, ID3D12Device* device)
 
 #pragma endregion
 }
-//
-////3Dオブジェクトの初期化処理の呼び出し
-//void SetIntializeObject3ds(Object3d* object3ds[],const size_t kObjectCount, ID3D12Device* device)
-//{
+
+//3Dオブジェクトの初期化処理の呼び出し
+void SetIntializeObject3ds(Object3d* object3ds[],const size_t kObjectCount, ID3D12Device* device)
+{
 //	Object3d object[kObjectCount];
 //
 //	//配列内の全オブジェクトに対して
@@ -126,7 +126,7 @@ void InitializeObject3d(Object3d* object, ID3D12Device* device)
 //			object3ds[i]->position = { 0.0f,0.0f,-8.0f };
 //		}
 //	}
-//}
+}
 
 //オブジェクト更新処理
 void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection) 
@@ -157,6 +157,19 @@ void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection
 	//定数バッファへデータ転送
 	object->constMapTransform->mat = object->matWorld * matView * matProjection;
 
+}
+
+void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW& vbView,
+	D3D12_INDEX_BUFFER_VIEW& ibView, UINT numIndices){
+	//頂点バッファの設定
+	commandList->IASetVertexBuffers(0, 1, &vbView);
+	//インデックスバッファの設定
+	commandList->IASetIndexBuffer(&ibView);
+	//定数バッファビュー(CBV)の設定コマンド
+	commandList->SetGraphicsRootConstantBufferView(2, object->constBuffTransform->GetGPUVirtualAddress());
+
+	//描画コマンド
+	commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
 }
 
 //ウィンドウプロシージャ
