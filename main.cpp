@@ -29,6 +29,8 @@
 
 using namespace DirectX;
 
+
+
 //定数バッファ用データ構造体(マテリアル)
 struct ConstBufferDataMaterial
 {
@@ -165,6 +167,48 @@ void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D1
 
 	//描画コマンド
 	commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
+}
+
+
+bool ifKeyPress(uint8_t key)
+{
+	if(key == 0x80)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool ifKeyRelease(uint8_t key)
+{
+	if (key == 0x00)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool ifKeyPressTrigger(uint8_t key,uint8_t oldkey)
+{
+	if (key == 0x80)
+	{
+		if (oldkey == 0x00)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool ifKeyReleaseTrigger(uint8_t key,uint8_t oldkey)
+{
+	if (key == 0x00)
+	{
+		if (oldkey == 0x80)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 //座標操作
@@ -582,6 +626,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	};
 
+	bool ifOneTextureNum = true;
+
 	//頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
 	UINT sizeVB = static_cast<UINT>(sizeof(vertices[0]) * _countof(vertices));
 
@@ -948,7 +994,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//3Dオブジェクトの配列
 	Object3d object3ds[kObjectCount];
 
+	
 
+	XMFLOAT3 rndScale;
+	XMFLOAT3 rndRota;
+	XMFLOAT3 rndPos;
 
 	//配列内の全オブジェクトに対して
 	for (int i = 0; i < _countof(object3ds); i++)
@@ -961,14 +1011,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//ここから↓は親子構造のサンプル
 		//先頭以外なら
 		if (i > 0) {
+
+			
+			rndScale = {
+				0.7f,
+				0.7f,
+				0.7f,
+			};
+
+			rndRota = {
+				XMConvertToRadians( static_cast<float>(rand() % 90)),
+				XMConvertToRadians( static_cast<float>(rand() % 90)),
+				XMConvertToRadians( static_cast<float>(rand() % 90)),
+			};
+			
+			rndPos = {
+				static_cast<float>(rand() % 60 - 30),
+				static_cast<float>(rand() % 60 - 30),
+				static_cast<float>(rand() % 60 - 30),
+			};
+
+			object3ds[i].scale = rndScale;
+
+			object3ds[i].rotation = rndRota;
+			//{ 
+			//	0.0f/*XMConvertToRadians(0.0f)*/,
+			//	0.0f/*XMConvertToRadians(0.0f)*/,
+			//	XMConvertToRadians(30.0f)};
+
+			object3ds[i].position = rndPos;
+
+
+
 			//1つ前のオブジェクトを親オブジェクトとする
-			object3ds[i].parent = &object3ds[i - 1];
-			//親オブジェクトの9割の大きさ
-			object3ds[i].scale = { 0.9f,0.9f,0.9f };
-			//親オブジェクトに対してZ軸まわりに30度回転
-			object3ds[i].rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f)};
-			//親オブジェクトに対してZ方向に-8.0ずらす
-			object3ds[i].position = { 0.0f,0.0f,-8.0f };
+			//object3ds[i].parent = &object3ds[i - 1];
+			////親オブジェクトの9割の大きさ
+			//object3ds[i].scale = { 0.9f,0.9f,0.9f };
+			////親オブジェクトに対してZ軸まわりに30度回転
+			//object3ds[i].rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f)};
+			////親オブジェクトに対してZ方向に-8.0ずらす
+			//object3ds[i].position = { 0.0f,0.0f,-8.0f };
 		}
 
 	}
@@ -1269,7 +1351,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//device->CreateConstantBufferView(&cbvDesc, srvHandle);
 
 	//------描画初期化処理 ここまで------
-
+	BYTE key[256] = {};
+	BYTE oldkey[256] = {};
 
 
 	//ゲームループ
@@ -1307,7 +1390,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//キーボード情報の取得開始
 		keyboard->Acquire();
 		//全キーの入力状態を取得する
-		BYTE key[256] = {};
+		
+		for (int i = 0; i < 256; i++)
+		{
+			oldkey[i] = key[i];
+		}
+		
 		keyboard->GetDeviceState(sizeof(key), key);
 
 #pragma region ターゲットの周りを回るカメラ
@@ -1419,6 +1507,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 #pragma endregion
 
+		if (ifKeyPressTrigger(key[DIK_SPACE], oldkey[DIK_SPACE]))
+		{
+			ifOneTextureNum = !ifOneTextureNum;
+		}
+
 		//4.描画コマンドここから
 
 		//ビューポート設定コマンド
@@ -1463,9 +1556,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		////SRVヒープの先頭にあるSRVをルートパラメータ1番に設定
 		commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
 		//
+		
+		if (ifOneTextureNum == false)
+		{
 		//2枚目を指し示すようにしたSRVのハンドルをルートパラメータに設定
 		srvGpuHandle.ptr += incrementSize;
 		commandList->SetGraphicsRootDescriptorTable(1, srvGpuHandle);
+		}
+		
 
 
 		//インデックスバッファビューの設定コマンド
