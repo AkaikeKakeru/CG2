@@ -385,11 +385,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif
 
 	HRESULT result;
-	ID3D12Device* device = nullptr;
-	IDXGIFactory7* dxgiFactry = nullptr;
+
+	//IDXGIFactory6* dxgiFactry = nullptr;
+	ComPtr<IDXGIFactory6> dxgiFactory;
+
 	IDXGISwapChain4* swapChain = nullptr;
-	/*ID3D12Device* dev = nullptr;
-	ComPtr<ID3D12Device> dev;*/
+
+	//ID3D12Device* device = nullptr;
+	ComPtr<ID3D12Device> device;
+
 	ID3D12CommandAllocator* commandAllocator = nullptr;
 	ID3D12GraphicsCommandList* commandList = nullptr;
 	ID3D12CommandQueue* commandQueue = nullptr;
