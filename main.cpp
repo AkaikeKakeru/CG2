@@ -386,8 +386,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	HRESULT result;
 
-	//IDXGIFactory6* dxgiFactry = nullptr;
-	ComPtr<IDXGIFactory6> dxgiFactory;
+	//IDXGIFactory7* dxgiFactory = nullptr;
+	ComPtr<IDXGIFactory7> dxgiFactory;
 
 	IDXGISwapChain4* swapChain = nullptr;
 
@@ -400,17 +400,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12DescriptorHeap* rtvHeap = nullptr;
 
 	//DXGIファクトリー生成
-	result = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactry));
+	result = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
 	assert(SUCCEEDED(result));
 
 	//アダプターの列挙用
-	std::vector<IDXGIAdapter4*>adapters;
+	//std::vector<IDXGIAdapter4*>adapters;
+	std::vector<ComPtr<IDXGIAdapter4*>> adapters;
+	
 	//ここに特定の名前を持つアダプターオブジェクトが入る
 	IDXGIAdapter4* tmpAdapter = nullptr;
 
 	//パフォーマンスが高いものから順に、すべてのアダプターを列挙
 	for (UINT i = 0;
-		dxgiFactry->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&tmpAdapter)) != DXGI_ERROR_NOT_FOUND
+		dxgiFactory->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&tmpAdapter)) != DXGI_ERROR_NOT_FOUND
 		; i++)
 	{
 		//動的配列に追加
@@ -483,7 +485,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	//スワップチェーンの生成
-	result = dxgiFactry->CreateSwapChainForHwnd(
+	result = dxgiFactory->CreateSwapChainForHwnd(
 		commandQueue, hwnd, &swapChainDesc, nullptr, nullptr,
 		(IDXGISwapChain1**)&swapChain);
 	assert(SUCCEEDED(result));
