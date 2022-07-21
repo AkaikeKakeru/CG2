@@ -405,7 +405,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//アダプターの列挙用
 	//std::vector<IDXGIAdapter4*>adapters;
-	std::vector<ComPtr<IDXGIAdapter4*>> adapters;
+	std::vector<ComPtr<IDXGIAdapter4>> adapters;
 	
 	//ここに特定の名前を持つアダプターオブジェクトが入る
 	IDXGIAdapter4* tmpAdapter = nullptr;
@@ -500,7 +500,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region レンダァタァゲットビュゥ
 
 	//バックバッファ
-	std::vector<ID3D12Resource*> backBuffers;
+	//std::vector<ID3D12Resource*> backBuffers(2);
+	std::vector<ComPtr<ID3D12Resource>> backBuffers(2);
+
 	backBuffers.resize(swapChainDesc.BufferCount);
 
 
