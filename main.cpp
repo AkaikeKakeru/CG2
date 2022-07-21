@@ -791,9 +791,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//頂点１つ分のデータサイズ
 	vbView.StrideInBytes = sizeof(vertices[0]);
 
-	ID3DBlob* vsBlob = nullptr;//頂点シェーダオブジェクト
-	ID3DBlob* psBlob = nullptr;//ピクセルシェーダオブジェクト
-	ID3DBlob* errorBlob = nullptr;//エラーオブジェクト
+	ComPtr<ID3DBlob> vsBlob = nullptr;//頂点シェーダオブジェクト
+	ComPtr<ID3DBlob> psBlob = nullptr;//ピクセルシェーダオブジェクト
+	ComPtr<ID3DBlob> errorBlob = nullptr;//エラーオブジェクト
 
 	//頂点シェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
@@ -1020,7 +1020,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootSignatureDesc.NumStaticSamplers = 1;
 
 	//ルートシグネチャのシリアライズ
-	ID3DBlob* rootSigBlob = nullptr;
+	ComPtr<ID3DBlob> rootSigBlob = nullptr;
 	result = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0,
 		&rootSigBlob, &errorBlob);
 	assert(SUCCEEDED(result));
@@ -1032,7 +1032,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pipelineDesc.pRootSignature = rootSignature;
 
 	//パイプラインステートの生成
-	ID3D12PipelineState* pipelineState = nullptr;
+	ComPtr<ID3D12PipelineState> pipelineState = nullptr;
 	result = device->CreateGraphicsPipelineState(&pipelineDesc,
 		IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
