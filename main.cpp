@@ -47,13 +47,13 @@ struct ConstBufferDataTransform {
 };
 
 //3Dオブジェクト型
-typedef struct Object3d
+struct Object3d
 {
 	//定数バッファ(行列用)
-	ID3D12Resource* constBuffTransform;
+	ID3D12Resource* constBuffTransform = {};
 
 	//定数バッファマップ(行列用)
-	ConstBufferDataTransform* constMapTransform;
+	ConstBufferDataTransform* constMapTransform = {};
 
 	//アフィン変換情報
 	XMFLOAT3 scale = { 1,1,1 };
@@ -61,11 +61,11 @@ typedef struct Object3d
 	XMFLOAT3 position = { 0,0,0 };
 
 	//ワールド変換行列
-	XMMATRIX matWorld;
+	XMMATRIX matWorld = {};
 
 	//親オブジェクトへのポインタ
 	Object3d* parent = nullptr;
-}Object3d;
+};
 
 struct TextureData
 {
@@ -261,8 +261,6 @@ void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D1
 }
 
 
-
-
 bool ifKeyPress(uint8_t key)
 {
 	if (key == 0x80)
@@ -360,7 +358,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
 	HWND hwnd = CreateWindow(w.lpszClassName,
-		L"DirectXGame",
+		L"LE2B_01_アカイケ_カケル_CG2",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -621,7 +619,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//座標
 	XMFLOAT3 position;
 	//座標
-	XMFLOAT3 position1;
+	//XMFLOAT3 position1;
 
 	//拡縮倍率
 	scale = { 1.0f,1.0f,1.0f };
@@ -1185,18 +1183,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 #pragma region ワールド変換行列
-	XMMATRIX matWorld;
-	matWorld = XMMatrixIdentity();
 
-	XMMATRIX matScale; //スケーリング行列
+	//XMMATRIX matWorld;
+	//matWorld = XMMatrixIdentity();
 
-	XMMATRIX matRot; //回転行列
-	matRot = XMMatrixIdentity();
+	//XMMATRIX matScale; //スケーリング行列
 
-	XMMATRIX matTrans; //平行移動行列
-	matTrans = XMMatrixTranslation(0, 0, 0);
+	//XMMATRIX matRot; //回転行列
+	//matRot = XMMatrixIdentity();
 
-	matWorld *= matTrans; //ワールド行列に平行移動を反映
+	//XMMATRIX matTrans; //平行移動行列
+	//matTrans = XMMatrixTranslation(0, 0, 0);
+
+	//matWorld *= matTrans; //ワールド行列に平行移動を反映
 
 #pragma endregion
 
