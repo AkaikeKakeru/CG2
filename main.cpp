@@ -54,30 +54,6 @@ struct Vertex
 	XMFLOAT2 uv;		//uv座標
 };
 
-struct DescAndHeap
-{
-	D3D12_HEAP_PROPERTIES heapProp{};
-	D3D12_RESOURCE_DESC resDesc{};
-	ComPtr<ID3D12Resource> vertBuff = nullptr;
-	Vertex* vertMap{};
-	D3D12_VERTEX_BUFFER_VIEW vbView{};
-
-	ComPtr<ID3DBlob> vsBlob = nullptr;//頂点シェーダオブジェクト
-	ComPtr<ID3DBlob> psBlob = nullptr;//ピクセルシェーダオブジェクト
-	ComPtr<ID3DBlob> errorBlob = nullptr;//エラーオブジェクト
-
-	 //グラフィックスパイプライン設定
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc{};
-
-	D3D12_RENDER_TARGET_BLEND_DESC& blenddesc;
-};
-
-//2Dオブジェクト型
-struct Object2d
-{
-
-};
-
 //3Dオブジェクト型
 struct Object3d
 {
@@ -114,196 +90,6 @@ struct TextureData
 
 	
 };
-
-void InitializeVertices(Vertex* vertices,DescAndHeap* dh, ID3D12Device* device/*, Vertex* vertMap*/)
-{
-	HRESULT result;
-
-	//頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
-	UINT sizeVB = static_cast<UINT>(sizeof(vertices[0]) * size_t(vertices));
-
-	//頂点バッファの設定
-	//ヒープ設定
-	//D3D12_HEAP_PROPERTIES heapProp{};
-	dh->heapProp.Type = D3D12_HEAP_TYPE_UPLOAD;//GPUの転送用
-										   //リソース設定
-	//D3D12_RESOURCE_DESC resDesc{};
-	dh->resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	dh->resDesc.Width = sizeVB;//頂点データ全体のサイズ
-	dh->resDesc.Height = 1;
-	dh->resDesc.DepthOrArraySize = 1;
-	dh->resDesc.MipLevels = 1;
-	dh->resDesc.SampleDesc.Count = 1;
-	dh->resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-	//頂点バッファの生成
-	//ComPtr<ID3D12Resource> vertBuff = nullptr;
-	result = device->CreateCommittedResource(
-		&dh->heapProp,//ヒープ設定
-		D3D12_HEAP_FLAG_NONE,
-		&dh->resDesc,//リソース設定
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&dh->vertBuff));
-	assert(SUCCEEDED(result));
-
-	//GPU上のバッファに対応仮想メモリ(メインメモリ上)を取得
-	//vertMap = nullptr;
-	result = dh->vertBuff->Map(0, nullptr, (void**)&dh->vertMap);
-	assert(SUCCEEDED(result));
-
-	/* verticesに記入 */
-
-	//全頂点に対して
-	for (int i = 0; i < size_t(vertices); i++)
-	{
-		dh->vertMap[i] = vertices[i];//座標をコピー
-	}
-
-	//繋がりを解除
-	dh->vertBuff->Unmap(0, nullptr);
-
-	//頂点バッファビューの作成
-	//D3D12_VERTEX_BUFFER_VIEW vbView{};
-	//GPU仮想アドレス
-	dh->vbView.BufferLocation = dh->vertBuff->GetGPUVirtualAddress();
-	//頂点バッファのサイズ
-	dh->vbView.SizeInBytes = sizeVB;
-	//頂点１つ分のデータサイズ
-	dh->vbView.StrideInBytes = sizeof(vertices[0]);
-
-	//ComPtr<ID3DBlob> vsBlob = nullptr;//頂点シェーダオブジェクト
-	//ComPtr<ID3DBlob> psBlob = nullptr;//ピクセルシェーダオブジェクト
-	//ComPtr<ID3DBlob> errorBlob = nullptr;//エラーオブジェクト
-
-										 //頂点シェーダの読み込みとコンパイル
-	result = D3DCompileFromFile(
-		L"BasicVS.hlsl",//シェーダファイル名
-		nullptr,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,//インクルード可能にする
-		"main", "vs_5_0",//エントリーポイント名、シェーダ―モデル指定
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,//デバッグ用設定
-		0,
-		&dh->vsBlob, &dh->errorBlob);
-
-	//エラーなら
-	if (FAILED(result)) {
-		//errorBlobからエラー内容をstring型にコピー
-		std::string error;
-		error.resize(dh->errorBlob->GetBufferSize());
-
-		std::copy_n((char*)dh->errorBlob->GetBufferPointer(),
-			dh->errorBlob->GetBufferSize(),
-			error.begin());
-		error += "\n";
-		//エラー内容を出力ウィンドウに表示
-		OutputDebugStringA(error.c_str());
-		assert(0);
-	}
-
-	//ピクセルシェーダの読み込みとコンパイル
-	result = D3DCompileFromFile(
-		L"BasicPS.hlsl",//シェーダファイル名
-		nullptr,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,//インクルード可能にする
-		"main", "ps_5_0",//エントリーポイント名、シェーダーモデル指定
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,//デバッグ用設定
-		0,
-		&dh->psBlob, &dh->errorBlob);
-
-	//エラーなら
-	if (FAILED(result)) {
-		//errorBlobからエラー内容をstring型にコピー
-		std::string error;
-		error.resize(dh->errorBlob->GetBufferSize());
-
-		std::copy_n((char*)dh->errorBlob->GetBufferPointer(),
-			dh->errorBlob->GetBufferSize(),
-			error.begin());
-		error += "\n";
-		//エラー内容を出力ウィンドウに表示
-		OutputDebugStringA(error.c_str());
-		assert(0);
-	}
-};
-
-void InitializeBlend(DescAndHeap* dh)
-{
-	//レンダ―ターゲットのブレンド設定
-	dh->blenddesc = dh->pipelineDesc.BlendState.RenderTarget[0];
-	dh->blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	//アルファ値共通設定
-	dh->blenddesc.BlendEnable = true; // ブレンド有効にする
-	dh->blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD; //ブレンドを有効にする
-	dh->blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE; //加算
-	dh->blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO; //デストの値を 0%使う　
-
-	////加算合成
-	//dh->blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
-	//dh->blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
-	//dh->blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
-
-	//減算合成
-	//dh->blenddesc.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT; //減算
-	//dh->blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値を100%使う
-	//dh->blenddesc.DestBlend = D3D12_BLEND_ONE; //デストの値を100%使う
-
-	 //色反転
-	 //dh->blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
-	 //dh->blenddesc.SrcBlend = D3D12_BLEND_INV_DEST_COLOR; //1.0f-デストから－の値
-	 //dh->blenddesc.DestBlend = D3D12_BLEND_ZERO; //使わない
-
-	 //半透明合成
-	dh->blenddesc.BlendOp = D3D12_BLEND_OP_ADD; //加算
-	dh->blenddesc.SrcBlend = D3D12_BLEND_ONE; //ソースの値をアルファ値
-	dh->blenddesc.DestBlend = D3D12_BLEND_ONE; //1.0f-ソースのアルファ値
-}
-
-void InitializePipeLine(DescAndHeap* dh,D3D12_INPUT_ELEMENT_DESC* inputLayout)
-{
-	//シェーダーの設定
-	dh->pipelineDesc.VS.pShaderBytecode = dh->vsBlob->GetBufferPointer();
-	dh->pipelineDesc.VS.BytecodeLength = dh->vsBlob->GetBufferSize();
-	dh->pipelineDesc.PS.pShaderBytecode = dh->psBlob->GetBufferPointer();
-	dh->pipelineDesc.PS.BytecodeLength = dh->psBlob->GetBufferSize();
-
-	//サンプルマスクの設定
-	dh->pipelineDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;//標準設定
-	//pipelineDesc.SampleMask = UINT_MAX;
-
-	//ラスタライザの設定
-	//背面カリングも設定する
-	//pipelineDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;//カリングしない
-	dh->pipelineDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;//背面カリングする
-	dh->pipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;//ポリゴン内塗りつぶし
-	dh->pipelineDesc.RasterizerState.DepthClipEnable = true;//深度クリッピングを有効に
-
-	InitializeBlend(dh);
-
-	//頂点レイアウトの設定
-	dh->pipelineDesc.InputLayout.pInputElementDescs = inputLayout;
-	dh->pipelineDesc.InputLayout.NumElements = size_t(inputLayout);
-
-	//図形の形状設定
-	dh->pipelineDesc.PrimitiveTopologyType
-		= D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-
-#pragma region 深度テストの設定
-	//デプスステンシルステートの設定
-	dh->pipelineDesc.DepthStencilState.DepthEnable = true;
-	dh->pipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	dh->pipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-	dh->pipelineDesc.DSVFormat = DXGI_FORMAT_R32_FLOAT;
-#pragma endregion
-
-	//その他の設定
-	dh->pipelineDesc.NumRenderTargets = 1;//描画対象は1つ
-	dh->pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//0～255指定のRGBA
-	dh->pipelineDesc.SampleDesc.Count = 1;//1ピクセルにつき1回サンプリング
-};
-
 
 //3Dオブジェクトの初期化
 void InitializeObject3d(Object3d* object, ComPtr<ID3D12Device> device)
@@ -612,12 +398,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	HRESULT result;
 
-	//IDXGIFactory7* dxgiFactory = nullptr;
 	ComPtr<IDXGIFactory7> dxgiFactory;
 
 	ComPtr<IDXGISwapChain4> swapChain = nullptr;
 
-	//ID3D12Device* device = nullptr;
 	ComPtr<ID3D12Device> device;
 
 	ComPtr<ID3D12CommandAllocator> commandAllocator = nullptr;
@@ -956,9 +740,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool ifOneTextureNum = true;
 
-//	DescAndHeap* descAndHeap{};
-
-	//InitializeVertices(vertices,descAndHeap,device.Get());
 
 	//頂点データ全体のサイズ = 頂点データ一つ分のサイズ * 頂点データの要素数
 	UINT sizeVB = static_cast<UINT>(sizeof(vertices[0]) * _countof(vertices));
@@ -1102,11 +883,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//{/*...*/},
 	};
 
-	//InitializePipeLine(descAndHeap,inputLayout);
-
 	//グラフィックスパイプライン設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc{};
-
 
 	//シェーダーの設定
 	pipelineDesc.VS.pShaderBytecode = vsBlob->GetBufferPointer();
@@ -1268,7 +1046,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
 
-
 	ComPtr<ID3D12Resource> constBuffMaterial = nullptr;
 
 #pragma endregion
@@ -1345,15 +1122,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//配列内の全オブジェクトに対して
 	for (int i = 0; i < _countof(object3ds); i++)
 	{
-		//SetIntializeObject3ds(&object3ds[i], device, i);
-
 		//初期化
 		InitializeObject3d(&object3ds[i], device);
 
 		//ここから↓は親子構造のサンプル
 		//先頭以外なら
 		if (i > 0) {
-
 
 			rndScale = {
 				0.7f,
