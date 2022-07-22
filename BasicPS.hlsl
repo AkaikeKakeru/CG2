@@ -21,9 +21,8 @@ float4 main(VSOutput input) : SV_TARGET
 
 	//輝度をRGBに代入して出力
 	//テクスチャの色と合成する
-	//return float4(texColor.rgb * brightness,texColor.a) * color;
+	return float4(texColor.rgb * brightness,texColor.a) * color;
 
-	return  float4 (color.rgb * brightness,color.a);
 	//RGBをそれぞれの法線のXYZ、Aを1で出力
 	//return float4(input.normal,1);
 }
