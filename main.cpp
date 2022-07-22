@@ -306,7 +306,7 @@ void InitializePipeLine(DescAndHeap* dh,D3D12_INPUT_ELEMENT_DESC* inputLayout)
 
 
 //3Dオブジェクトの初期化
-void InitializeObject3d(Object3d* object,ID3D12Device* device)
+void InitializeObject3d(Object3d* object, ComPtr<ID3D12Device> device)
 {
 	HRESULT result;
 
@@ -371,7 +371,7 @@ void InitializeTexture(TextureData* textureData,const wchar_t* szFile)
 
 };
 
-void TransferTextureBuffer(TextureData* textureData,ID3D12Device* device)
+void TransferTextureBuffer(TextureData* textureData,ComPtr<ID3D12Device> device)
 {
 	HRESULT result;
 
@@ -421,7 +421,7 @@ void TransferTextureBuffer(TextureData* textureData,ID3D12Device* device)
 }
 
 //3Dオブジェクトの初期化処理の呼び出し
-void SetIntializeObject3ds(Object3d* object,ID3D12Device* device, int objectNum)
+void SetIntializeObject3ds(Object3d* object, ComPtr<ID3D12Device> device, int objectNum)
 {
 	//初期化
 	InitializeObject3d(object, device);
@@ -472,7 +472,7 @@ void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection
 
 }
 
-void DrawObject3d(Object3d* object,ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW& vbView,
+void DrawObject3d(Object3d* object, ComPtr<ID3D12GraphicsCommandList> commandList, D3D12_VERTEX_BUFFER_VIEW& vbView,
 	D3D12_INDEX_BUFFER_VIEW& ibView, UINT numIndices) {
 	//頂点バッファの設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);
@@ -1348,7 +1348,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//SetIntializeObject3ds(&object3ds[i], device, i);
 
 		//初期化
-		InitializeObject3d(&object3ds[i], device.Get());
+		InitializeObject3d(&object3ds[i], device);
 
 		//ここから↓は親子構造のサンプル
 		//先頭以外なら
@@ -1505,7 +1505,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	for (size_t i = 0; i < _countof(textureDatas); i++)
 	{
-		TransferTextureBuffer(&textureDatas[i], device.Get());
+		TransferTextureBuffer(&textureDatas[i], device);
 	}
 
 	//元データ開放
@@ -1521,12 +1521,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	srvHeapDesc.NumDescriptors = kMaxSRVCount;
 
 	//設定を基にSRV用デスクリプタヒープを生成
-	ID3D12DescriptorHeap* srvHeap  = nullptr;
+	ComPtr<ID3D12DescriptorHeap> srvHeap = nullptr;
 	result = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap));
 	assert(SUCCEEDED(result));
 
+
 	//SRVヒープの先頭ハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
+
 
 	//シェーダリソースビュー設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};//設定構造体
@@ -1793,7 +1795,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//定数バッファビュー(CBV)の設定コマンド
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
-		
+
 		//SRVヒープの設定コマンド
 		commandList->SetDescriptorHeaps(1, &srvHeap);
 
@@ -1815,7 +1817,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//全オブジェクトについて処理
 		for (int i = 0; i < _countof(object3ds); i++)
 		{
-			DrawObject3d(&object3ds[i], commandList.Get(), vbView, ibView, _countof(indices));
+			DrawObject3d(&object3ds[i], commandList, vbView, ibView, _countof(indices));
 		}
 
 		//4.ここまで、描画コマンド
@@ -1831,7 +1833,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		assert(SUCCEEDED(result));
 
 		//コマンドリストの実行
-		ID3D12CommandList* commandLists[] = { commandList.Get()};
+		ComPtr<ID3D12CommandList> commandLists[] = { commandList };
 		commandQueue->ExecuteCommandLists(1, commandLists);
 
 		//画面に表示するバッファをフリップ(裏表の入れ替え)
