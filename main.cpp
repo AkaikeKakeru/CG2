@@ -1598,10 +1598,14 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		//コマンドの実行完了を待つ
 		commandQueue->Signal(fence.Get(), ++fenceVal);
 		if (fence->GetCompletedValue() != fenceVal) {
-			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+			_Post_ _Notnull_ HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+			
+			if(event != 0)
+			{
 			fence->SetEventOnCompletion(fenceVal, event);
 			WaitForSingleObject(event, INFINITE);
 			CloseHandle(event);
+			}
 		}
 
 		//キューをクリア
