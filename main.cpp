@@ -16,7 +16,6 @@
 #include <dinput.h>
 
 #include "Struct.h"
-#include "Object.h"
 
 #include <wrl.h>
 
