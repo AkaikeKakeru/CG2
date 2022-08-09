@@ -27,10 +27,8 @@
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 
-
 using namespace DirectX;
 using namespace Microsoft::WRL;
-
 
 //定数バッファ用データ構造体(マテリアル)
 struct ConstBufferDataMaterial
@@ -72,7 +70,6 @@ struct TextureData
 	ScratchImage scratchImg{};
 	ScratchImage mipChine{};
 
-
 	D3D12_HEAP_PROPERTIES textureHeapProp{};
 	D3D12_RESOURCE_DESC textureResourceDesc{};
 
@@ -81,7 +78,7 @@ struct TextureData
 };
 
 //3Dオブジェクトの初期化
-void InitializeObject3d(Object3d* object,ID3D12Device* device)
+void InitializeObject3d(Object3d* object, ID3D12Device* device)
 {
 	HRESULT result;
 
@@ -99,7 +96,6 @@ void InitializeObject3d(Object3d* object,ID3D12Device* device)
 	resDesc.MipLevels = 1;
 	resDesc.SampleDesc.Count = 1;
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
 
 	//定数バッファの生成
 	result = device->CreateCommittedResource(
@@ -119,7 +115,8 @@ void InitializeObject3d(Object3d* object,ID3D12Device* device)
 #pragma endregion
 }
 
-void InitializeTexture(TextureData* textureData,const wchar_t* szFile)
+//テクスチャ初期化
+void InitializeTexture(TextureData* textureData, const wchar_t* szFile)
 {
 	HRESULT result;
 
@@ -127,13 +124,13 @@ void InitializeTexture(TextureData* textureData,const wchar_t* szFile)
 	result = LoadFromWICFile(
 		szFile,
 		WIC_FLAGS_NONE,
-		&textureData->metadata, 
+		&textureData->metadata,
 		textureData->scratchImg);
 
 	//ミップマップ生成
 	result = GenerateMipMaps(
-		textureData->scratchImg.GetImages(), 
-		textureData->scratchImg.GetImageCount(), 
+		textureData->scratchImg.GetImages(),
+		textureData->scratchImg.GetImageCount(),
 		textureData->scratchImg.GetMetadata(),
 		TEX_FILTER_DEFAULT, 0, textureData->mipChine);
 	if (SUCCEEDED(result)) {
@@ -145,7 +142,8 @@ void InitializeTexture(TextureData* textureData,const wchar_t* szFile)
 
 };
 
-void TransferTextureBuffer(TextureData* textureData,ID3D12Device* device)
+//テクスチャバッファ初期化
+void TransferTextureBuffer(TextureData* textureData, ID3D12Device* device)
 {
 	HRESULT result;
 
@@ -194,27 +192,6 @@ void TransferTextureBuffer(TextureData* textureData,ID3D12Device* device)
 	}
 }
 
-//3Dオブジェクトの初期化処理の呼び出し
-void SetIntializeObject3ds(Object3d* object,ID3D12Device* device, int objectNum)
-{
-	//初期化
-	InitializeObject3d(object, device);
-
-	//ここから↓は親子構造のサンプル
-	//先頭以外なら
-	if (objectNum > 0) {
-		//1つ前のオブジェクトを親オブジェクトとする
-		object->parent = &object[objectNum - 1];
-		//親オブジェクトの9割の大きさ
-		object->scale = { 0.9f,0.9f,0.9f };
-		//親オブジェクトに対してZ軸まわりに30度回転
-		object->rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f) };
-		//親オブジェクトに対してZ方向に-8.0ずらす
-		object->position = { 0.0f,0.0f,-8.0f };
-	}
-
-}
-
 //オブジェクト更新処理
 void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection)
 {
@@ -243,10 +220,10 @@ void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection
 
 	//定数バッファへデータ転送
 	object->constMapTransform->mat = object->matWorld * matView * matProjection;
-
 }
 
-void DrawObject3d(Object3d* object,ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW& vbView,
+//オブジェクト描画
+void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW& vbView,
 	D3D12_INDEX_BUFFER_VIEW& ibView, UINT numIndices) {
 	//頂点バッファの設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);
@@ -259,7 +236,7 @@ void DrawObject3d(Object3d* object,ID3D12GraphicsCommandList* commandList, D3D12
 	commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
 }
 
-
+//キー押し
 bool ifKeyPress(uint8_t key)
 {
 	if (key == 0x80)
@@ -268,6 +245,7 @@ bool ifKeyPress(uint8_t key)
 	}
 	return false;
 }
+//キー離し
 bool ifKeyRelease(uint8_t key)
 {
 	if (key == 0x00)
@@ -276,6 +254,7 @@ bool ifKeyRelease(uint8_t key)
 	}
 	return false;
 }
+//キー押した瞬間
 bool ifKeyPressTrigger(uint8_t key, uint8_t oldkey)
 {
 	if (key == 0x80)
@@ -287,6 +266,7 @@ bool ifKeyPressTrigger(uint8_t key, uint8_t oldkey)
 	}
 	return false;
 }
+//キー離した瞬間
 bool ifKeyReleaseTrigger(uint8_t key, uint8_t oldkey)
 {
 	if (key == 0x00)
@@ -317,6 +297,19 @@ void UpdateObjectControll(Object3d* object, BYTE* key) {
 	UpdateObjectPosition(object, key);
 }
 
+//ターゲット周りを回るカメラ
+void UpdateRotaTargetCamera(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection,
+	float angle, XMFLOAT3 eye, XMFLOAT3 target, XMFLOAT3 up, BYTE* key)
+{
+	//angleラジアンだけY軸周りに回転、半径は-100
+	eye.x = -100 * sinf(angle);
+	eye.z = -100 * cosf(angle);
+	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
+		XMLoadFloat3(&target), XMLoadFloat3(&up));
+
+	object[0].constMapTransform->mat = matView * matProjection;
+}
+
 //ウィンドウプロシージャ
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	switch (msg) {
@@ -331,15 +324,13 @@ LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
+int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//------WindowsAPI初期化処理 ここから------
 	//サイズ
 	const int window_width = 1280;
 	const int window_height = 720;
 
 	const float PI = 3.1415926535f;
-
-
 
 	//クラス設定
 	WNDCLASSEX w{};
@@ -405,7 +396,7 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	//アダプターの列挙用
 	//std::vector<IDXGIAdapter4*>adapters;
 	std::vector<ComPtr<IDXGIAdapter4>> adapters;
-	
+
 	//ここに特定の名前を持つアダプターオブジェクトが入る
 	ComPtr<IDXGIAdapter4> tmpAdapter = nullptr;
 
@@ -491,7 +482,7 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		commandQueue.Get(),
 		hwnd,
 		&swapChainDesc,
-		nullptr, 
+		nullptr,
 		nullptr,
 		&swapChain1);
 	assert(SUCCEEDED(result));
@@ -509,14 +500,14 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 #pragma region レンダァタァゲットビュゥ
 
 	//バックバッファ
-	//std::vector<ID3D12Resource*> backBuffers(2);
 	std::vector<ComPtr<ID3D12Resource>> backBuffers(2);
 
 	backBuffers.resize(swapChainDesc.BufferCount);
 
-
 	//スワップチェーンのすべてのバッファについて処理する
 	for (size_t i = 0; i < backBuffers.size(); i++) {
+		//InitializeBackBuffers();
+
 		//スワップチェーンからバッファを取得
 		swapChain->GetBuffer((UINT)i, IID_PPV_ARGS(&backBuffers[i]));
 		//デスクリプタヒープのハンドルを取得
@@ -593,7 +584,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 
 #pragma endregion
 
-
 	//フェンスの生成
 	ComPtr<ID3D12Fence> fence = nullptr;
 	UINT64 fenceVal = 0;
@@ -622,7 +612,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	assert(SUCCEEDED(result));
 
 #pragma endregion
-
 	//------DirectX初期化処理 ここまで------
 
 	//------描画初期化処理 ここから------
@@ -645,7 +634,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	//座標
 	position = { 0.0f,0.0f,0.0f };
 	//position1 = { -20.0f,0.0f,0.0f };
-
 
 	//頂点データ構造体
 	struct Vertex
@@ -955,7 +943,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//0～255指定のRGBA
 	pipelineDesc.SampleDesc.Count = 1;//1ピクセルにつき1回サンプリング
 
-
 	//ルートシグネチャ
 	ComPtr<ID3D12RootSignature> rootSignature;
 
@@ -1023,11 +1010,11 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	result = D3D12SerializeRootSignature(
 		&rootSignatureDesc,
 		D3D_ROOT_SIGNATURE_VERSION_1_0,
-		&rootSigBlob, 
+		&rootSigBlob,
 		&errorBlob);
 	assert(SUCCEEDED(result));
 	result = device->CreateRootSignature(
-		0, 
+		0,
 		rootSigBlob->GetBufferPointer(),
 		rootSigBlob->GetBufferSize(),
 		IID_PPV_ARGS(&rootSignature));
@@ -1041,7 +1028,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	result = device->CreateGraphicsPipelineState(&pipelineDesc,
 		IID_PPV_ARGS(&pipelineState));
 	assert(SUCCEEDED(result));
-
 
 	ComPtr<ID3D12Resource> constBuffMaterial = nullptr;
 
@@ -1103,25 +1089,16 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	cbResourceDesc.SampleDesc.Count = 1;
 	cbResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-
 #pragma region 三次元オブジェクトの構造化
 
 	//3Dオブジェクトの数
-	const size_t kObjectCount = 50;
+	const size_t kObjectCount = 19;
 	//3Dオブジェクトの配列
 	Object3d object3ds[kObjectCount];
-
-
-
-	XMFLOAT3 rndScale;
-	XMFLOAT3 rndRota;
-	XMFLOAT3 rndPos;
 
 	//配列内の全オブジェクトに対して
 	for (int i = 0; i < _countof(object3ds); i++)
 	{
-		//SetIntializeObject3ds(&object3ds[i], device, i);
-
 		//初期化
 		InitializeObject3d(&object3ds[i], device.Get());
 
@@ -1129,49 +1106,22 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		//先頭以外なら
 		if (i > 0) {
 
+			object3ds[i].scale = XMFLOAT3(2.0f, 2.0f, 2.0f);
 
-			rndScale = {
-				0.7f,
-				0.7f,
-				0.7f,
-			};
+			object3ds[i].rotation = XMFLOAT3(XMConvertToRadians(0.0f),
+				XMConvertToRadians(0.0f),
+				XMConvertToRadians(0.0f)
+			);
 
-			rndRota = {
-				XMConvertToRadians(static_cast<float>(rand() % 90)),
-				XMConvertToRadians(static_cast<float>(rand() % 90)),
-				XMConvertToRadians(static_cast<float>(rand() % 90)),
-			};
+			object3ds[i].position = XMFLOAT3(-100.0f + (i * 20.0f), 40.0f, 0.0f);
 
-			rndPos = {
-				static_cast<float>(rand() % 60 - 30),
-				static_cast<float>(rand() % 60 - 30),
-				static_cast<float>(rand() % 60 - 30),
-			};
-
-			object3ds[i].scale = rndScale;
-
-			object3ds[i].rotation = rndRota;
-			//{ 
-			//	0.0f/*XMConvertToRadians(0.0f)*/,
-			//	0.0f/*XMConvertToRadians(0.0f)*/,
-			//	XMConvertToRadians(30.0f)};
-
-			object3ds[i].position = rndPos;
-
-
-
-			//1つ前のオブジェクトを親オブジェクトとする
-			//object3ds[i].parent = &object3ds[i - 1];
-			////親オブジェクトの9割の大きさ
-			//object3ds[i].scale = { 0.9f,0.9f,0.9f };
-			////親オブジェクトに対してZ軸まわりに30度回転
-			//object3ds[i].rotation = { 0.0f,0.0f,XMConvertToRadians(30.0f)};
-			////親オブジェクトに対してZ方向に-8.0ずらす
-			//object3ds[i].position = { 0.0f,0.0f,-8.0f };
+			if (i > 9)
+			{
+				object3ds[i].position.x = -100.0f + ((i - 9) * 20.0f);
+				object3ds[i].position.y = -40.0f;
+			}
 		}
-
 	}
-
 #pragma endregion
 
 #pragma region 単位行列で埋めた後
@@ -1264,9 +1214,9 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	ibView.SizeInBytes = sizeIB;
 
 	const int kTextureCount = 2;
-	TextureData textureDatas[kTextureCount] = {0};
+	TextureData textureDatas[kTextureCount] = { 0 };
 
-	const wchar_t* texImgs[kTextureCount] = 
+	const wchar_t* texImgs[kTextureCount] =
 	{
 		L"Resources/texture.png",
 		L"Resources/reimu.png",
@@ -1281,11 +1231,8 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	{
 		TransferTextureBuffer(&textureDatas[i], device.Get());
 	}
-
-
 	//元データ開放
 	//delete[] imageData;
-
 
 	//SRVの最大個数
 	const size_t kMaxSRVCount = 2056;
@@ -1297,7 +1244,7 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	srvHeapDesc.NumDescriptors = kMaxSRVCount;
 
 	//設定を基にSRV用デスクリプタヒープを生成
-	ID3D12DescriptorHeap* srvHeap  = nullptr;
+	ID3D12DescriptorHeap* srvHeap = nullptr;
 	result = device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap));
 	assert(SUCCEEDED(result));
 
@@ -1335,7 +1282,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 #pragma endregion
 	//OK//
 
-
 	////CBV,SRV,UAVの1個分のサイズを取得
 	//UINT descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	////SRVヒープの先頭ハンドルを取得
@@ -1354,7 +1300,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 	//------描画初期化処理 ここまで------
 	BYTE key[256] = {};
 	BYTE oldkey[256] = {};
-
 
 	//ゲームループ
 	while (true) {
@@ -1381,7 +1326,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
 		commandList->OMSetRenderTargets(1, &rtvHandle, false, &dsvHandle);
 
-
 		//3.画面クリア          R      G      B     A
 		FLOAT clearColor[] = { 0.1f, 0.25f, 0.5f, 0.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
@@ -1400,19 +1344,15 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		keyboard->GetDeviceState(sizeof(key), key);
 
 #pragma region ターゲットの周りを回るカメラ
-		if (key[DIK_D] || key[DIK_A])
+		/*if (key[DIK_D] || key[DIK_A])
 		{
 			if (key[DIK_D]) { angle += XMConvertToRadians(1.0f); }
 			else if (key[DIK_A]) { angle -= XMConvertToRadians(1.0f); }
 
-			//angleラジアンだけY軸周りに回転、半径は-100
-			eye.x = -100 * sinf(angle);
-			eye.z = -100 * cosf(angle);
-			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye),
-				XMLoadFloat3(&target), XMLoadFloat3(&up));
-
-			object3ds[0].constMapTransform->mat = matView * matProjection;
-		}
+			UpdateRotaTargetCamera(
+				&object3ds[0], matView, matProjection,
+				angle, eye, target, up, key);
+		}*/
 #pragma endregion
 
 #pragma region 連続移動
@@ -1420,10 +1360,9 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		for (size_t i = 0; i < _countof(object3ds); i++)
 		{
 			UpdateObject3d(&object3ds[i], matView, matProjection);
-
 		}
 
-		UpdateObjectControll(&object3ds[0], key);
+		//UpdateObjectControll(&object3ds[0], key);
 
 #pragma region	トランスレーション
 
@@ -1548,7 +1487,7 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 
 		//定数バッファビュー(CBV)の設定コマンド
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
-		
+
 		//SRVヒープの設定コマンド
 		commandList->SetDescriptorHeaps(1, &srvHeap);
 
@@ -1580,13 +1519,12 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 		commandList->ResourceBarrier(1, &barrierDesc);
 
-
 		//命令のクローズ
 		result = commandList->Close();
 		assert(SUCCEEDED(result));
 
 		//コマンドリストの実行
-		ID3D12CommandList* commandLists[] = { commandList.Get()};
+		ID3D12CommandList* commandLists[] = { commandList.Get() };
 		commandQueue->ExecuteCommandLists(1, commandLists);
 
 		//画面に表示するバッファをフリップ(裏表の入れ替え)
@@ -1598,12 +1536,12 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		commandQueue->Signal(fence.Get(), ++fenceVal);
 		if (fence->GetCompletedValue() != fenceVal) {
 			_Post_ _Notnull_ HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-			
-			if(event != 0)
+
+			if (event != 0)
 			{
-			fence->SetEventOnCompletion(fenceVal, event);
-			WaitForSingleObject(event, INFINITE);
-			CloseHandle(event);
+				fence->SetEventOnCompletion(fenceVal, event);
+				WaitForSingleObject(event, INFINITE);
+				CloseHandle(event);
 			}
 		}
 
@@ -1614,7 +1552,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		result = commandList->Reset(commandAllocator.Get(), nullptr);
 		assert(SUCCEEDED(result));
 
-
 		//メッセージはあるか？
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
@@ -1624,7 +1561,6 @@ int WINAPI WinMain(_In_ HINSTANCE,_In_opt_ HINSTANCE,_In_ LPSTR,_In_ int) {
 		if (msg.message == WM_QUIT) {
 			break;
 		}
-
 	}
 
 	//クラス登録を解除
